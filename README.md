@@ -90,12 +90,3 @@ Maps the end-user journey — how fraud analysts and compliance officers interac
 | API | Flask / FastAPI |
 | Version Control | Git & GitHub |
 
-
-## Team
-
-| Name | Roll No |
-|------|---------|
-| Chennamma Hotkar | PST-25-0248 / 251810700203 |
-| Kona Nagadevi | PST-25-0231 / 251810700321 |
-
-**Mentor:** Navneet Nautiyal — Data Analytics, Data Science, Python and its libraries
