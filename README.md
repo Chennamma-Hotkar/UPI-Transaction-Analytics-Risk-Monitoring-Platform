@@ -2,8 +2,6 @@
 
 A FinTech data analytics and machine learning project focused on detecting fraudulent UPI transactions, scoring risk levels, and monitoring suspicious activity in real time.
 
----
-
 ## Table of Contents
 
 - [About](#about)
