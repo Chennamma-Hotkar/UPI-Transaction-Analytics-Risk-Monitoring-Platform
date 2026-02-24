@@ -108,6 +108,30 @@ Dashboard + Report Export
 
 
 
+## Dataset
+
+The project uses a UPI transaction dataset (synthetic/sample) with the following key fields:
+
+| Field | Description |
+|-------|-------------|
+| `transaction_id` | Unique transaction identifier |
+| `amount` | Transaction amount (INR) |
+| `timestamp` | Date and time |
+| `user_id` | Sender account |
+| `merchant_id` | Receiver / payee |
+| `device_info` | Device used |
+| `location` | Geographic location |
+
+### EDA Findings
+
+- Identified outliers in transaction amount distribution
+- Detected peak transaction hours and behavioral differences across weekdays vs weekends
+- Flagged users with unusually high transaction frequency
+- Found inconsistencies in device and location patterns across sessions
+- Key features shortlisted: transaction frequency, time gap between transactions, amount deviation from user average, device/location consistency
+
+
+
 ## Dashboard
 
 The monitoring dashboard provides:
