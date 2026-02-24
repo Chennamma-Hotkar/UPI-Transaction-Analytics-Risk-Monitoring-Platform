@@ -2,13 +2,13 @@
 
 A machine learning-powered platform to detect fraudulent UPI transactions, score transaction risk in real time, and provide actionable insights through an analytics dashboard.
 
----
+
 
 ## Overview
 
 With UPI payments growing at an unprecedented scale in India, traditional manual fraud detection simply cannot keep up. This project tackles that gap by building an automated pipeline that ingests transaction data, runs it through ML models, assigns risk scores, and surfaces suspicious activity on a live monitoring dashboard.
 
----
+
 
 ## Features
 
@@ -21,7 +21,7 @@ With UPI payments growing at an unprecedented scale in India, traditional manual
 - **Monitoring Dashboard** — Visual overview of transaction volume, risk distribution, and flagged events
 - **Exportable Reports** — Download analysis results as CSV or PDF
 
----
+
 
 ## Tech Stack
 
@@ -36,7 +36,7 @@ With UPI payments growing at an unprecedented scale in India, traditional manual
 | Frontend (optional) | HTML, CSS, JavaScript / React |
 | Version Control | Git & GitHub |
 
----
+
 
 ## 📁 Project Structure
 
@@ -61,7 +61,7 @@ upi-risk-monitor/
 └── README.md
 ```
 
----
+
 
 
 
@@ -87,7 +87,7 @@ Store Results in DB
 Dashboard + Report Export
 ```
 
----
+
 
 ## Machine Learning Models
 
@@ -106,7 +106,7 @@ Dashboard + Report Export
 | Risk Score Separation | Clear Low / Medium / High bands |
 | Response Time | < 2 seconds per transaction |
 
----
+
 
 ## Dashboard
 
@@ -117,7 +117,7 @@ The monitoring dashboard provides:
 - Trend analysis over time
 - Flagged transaction drill-down view
 
----
+
 
 ## License
 
