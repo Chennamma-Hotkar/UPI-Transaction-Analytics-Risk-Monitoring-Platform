@@ -47,6 +47,13 @@ upi-risk-monitor/
 │   ├── raw/
 │   └── processed/
 │
+├── docs/
+│   └── diagrams/                # Architecture and flow diagrams
+│       ├── hld.png              # High-Level Design
+│       ├── lld.png              # Low-Level Design
+│       ├── dataflow.png         # Data Flow Diagram
+│       └── consumerflow.png     # Consumer Flow Diagram
+│
 ├── notebooks/                   # Exploratory analysis and model experiments
 │
 ├── src/
