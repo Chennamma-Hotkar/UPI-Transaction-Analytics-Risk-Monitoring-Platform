@@ -2,6 +2,7 @@
 
 A FinTech data analytics and machine learning project focused on detecting fraudulent UPI transactions, scoring risk levels, and monitoring suspicious activity in real time.
 
+
 ## Table of Contents
 
 - [About](#about)
@@ -11,7 +12,6 @@ A FinTech data analytics and machine learning project focused on detecting fraud
 - [Tech Stack](#tech-stack)
 - [Team](#team)
 
----
 
 ## About
 
@@ -22,7 +22,6 @@ UPI transactions in India have grown at an enormous scale, making manual fraud d
 - Identify mule accounts and money laundering patterns
 - Provide a real-time monitoring dashboard for fraud analysts and compliance teams
 
----
 
 ## Research & Problem Analysis
 
@@ -36,7 +35,6 @@ Key fraud patterns studied and considered for detection:
 
 A full **Product Requirements Document (PRD)** has been prepared covering problem scope, user stories, functional requirements, and success metrics.
 
----
 
 ## Dataset
 
@@ -60,7 +58,6 @@ The project uses a UPI transaction dataset (synthetic/sample) with the following
 - Found inconsistencies in device and location patterns across sessions
 - Key features shortlisted: transaction frequency, time gap between transactions, amount deviation from user average, device/location consistency
 
----
 
 ## System Design
 
@@ -80,7 +77,6 @@ Maps how raw transaction data moves through the system — from source ingestion
 
 Maps the end-user journey — how fraud analysts and compliance officers interact with the platform to review flagged transactions and generate reports.
 
----
 
 ## Tech Stack
 
@@ -94,7 +90,6 @@ Maps the end-user journey — how fraud analysts and compliance officers interac
 | API | Flask / FastAPI |
 | Version Control | Git & GitHub |
 
----
 
 ## Team
 
