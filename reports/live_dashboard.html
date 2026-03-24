@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UPI Risk Monitor — Live Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; }
+    header { background: linear-gradient(135deg,#1a1f2e,#2d3561);
+              padding: 20px 30px; border-bottom: 2px solid #3d5a99; }
+    header h1 { font-size: 1.6rem; color: #7eb8f7; }
+    header p  { font-size: 0.85rem; color: #8899aa; margin-top: 4px; }
+    .kpi-row  { display: flex; gap: 16px; padding: 20px 30px; flex-wrap: wrap; }
+    .kpi      { flex: 1; min-width: 160px; background: #1e2235;
+                 border-radius: 10px; padding: 18px 20px;
+                 border-left: 4px solid #3d5a99; }
+    .kpi .val { font-size: 1.9rem; font-weight: 700; color: #7eb8f7; }
+    .kpi .lbl { font-size: 0.78rem; color: #8899aa; margin-top: 4px; }
+    .charts   { display: grid; grid-template-columns: repeat(auto-fit,minmax(380px,1fr));
+                 gap: 20px; padding: 0 30px 20px; }
+    .card     { background: #1e2235; border-radius: 10px; padding: 20px; }
+    .card h3  { font-size: 0.95rem; color: #a0b4cc; margin-bottom: 14px; }
+    canvas    { max-height: 260px; }
+    .table-wrap { padding: 0 30px 30px; }
+    table     { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th        { background: #2d3561; color: #7eb8f7; padding: 10px 12px;
+                 text-align: left; }
+    td        { padding: 9px 12px; border-bottom: 1px solid #2a2f45; }
+    tr:hover td { background: #252b42; }
+    .badge    { padding: 3px 9px; border-radius: 12px; font-size: 0.75rem;
+                 font-weight: 600; }
+    .High   { background:#4d1515; color:#ff6b6b; }
+    .fraud1 { background:#4d1515; color:#ff6b6b; }
+    .fraud0 { background:#0d3320; color:#6bffb8; }
+    footer  { text-align:center; padding:16px; color:#556; font-size:0.78rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>UPI Transaction Analytics &amp; Risk Monitoring Platform</h1>
+  <p>PaySim1 Dataset &nbsp;|&nbsp; Generated: 2026-03-25 04:21:43 &nbsp;|&nbsp;
+     Auto-refreshes every 60s</p>
+</header>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="val">6,362,620</div><div class="lbl">Total Transactions</div></div>
+  <div class="kpi"><div class="val">8,213</div><div class="lbl">Fraud Detected</div></div>
+  <div class="kpi"><div class="val">0.129%</div><div class="lbl">Fraud Rate</div></div>
+  <div class="kpi"><div class="val">8,188</div><div class="lbl">High Risk Alerts</div></div>
+  <div class="kpi"><div class="val">1.0</div><div class="lbl">Best Model AUC (XGBoost)</div></div>
+</div>
+
+<div class="charts">
+  <div class="card"><h3>Risk Distribution</h3><canvas id="riskPie"></canvas></div>
+  <div class="card"><h3>Fraud by Transaction Type</h3><canvas id="fraudBar"></canvas></div>
+  <div class="card"><h3>Transaction Volume by Type</h3><canvas id="typeBar"></canvas></div>
+  <div class="card"><h3>Model AUC Comparison</h3><canvas id="aucBar"></canvas></div>
+</div>
+
+<div class="table-wrap">
+  <div class="card">
+    <h3>Top 20 High-Risk Alerts</h3>
+    <table>
+      <thead>
+        <tr><th>Sender</th><th>Receiver</th><th>Type</th>
+            <th>Amount</th><th>Risk Score</th><th>Fraud</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C1149220913</td><td>C771492028</td>
+          <td>CASH_OUT</td><td>₹3,244,067.13</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C790582807</td><td>C690378183</td>
+          <td>CASH_OUT</td><td>₹4,417,191.86</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C278936084</td><td>C1115591594</td>
+          <td>TRANSFER</td><td>₹1,158,070.88</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C2071602509</td><td>C39886288</td>
+          <td>TRANSFER</td><td>₹10,000,000.00</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C452762754</td><td>C66230253</td>
+          <td>TRANSFER</td><td>₹723,915.85</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C153745102</td><td>C1921197760</td>
+          <td>TRANSFER</td><td>₹586,718.88</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C148001678</td><td>C1491478238</td>
+          <td>CASH_OUT</td><td>₹1,336,901.11</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C408490456</td><td>C1143989341</td>
+          <td>CASH_OUT</td><td>₹1,170,213.18</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C1870394283</td><td>C1006464744</td>
+          <td>CASH_OUT</td><td>₹938,288.58</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C2094444528</td><td>C1305219704</td>
+          <td>TRANSFER</td><td>₹1,016,081.00</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C105750198</td><td>C1172379830</td>
+          <td>TRANSFER</td><td>₹422,261.63</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C780743034</td><td>C491519946</td>
+          <td>TRANSFER</td><td>₹10,000,000.00</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C1578662968</td><td>C620731531</td>
+          <td>TRANSFER</td><td>₹673,722.73</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C2113853115</td><td>C338573575</td>
+          <td>TRANSFER</td><td>₹597,411.76</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C1978325769</td><td>C297774281</td>
+          <td>CASH_OUT</td><td>₹3,260,215.75</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C1191467360</td><td>C1694026164</td>
+          <td>TRANSFER</td><td>₹1,989,311.31</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C1631478680</td><td>C1835027188</td>
+          <td>TRANSFER</td><td>₹466,580.69</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C717731676</td><td>C572895729</td>
+          <td>TRANSFER</td><td>₹1,397,162.15</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C2062481561</td><td>C935919630</td>
+          <td>TRANSFER</td><td>₹10,000,000.00</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr><tr>
+          <td>C526995277</td><td>C975347823</td>
+          <td>TRANSFER</td><td>₹3,043,141.07</td>
+          <td><span class="badge High">1.0000</span></td>
+          <td><span class="badge fraud1">
+            FRAUD</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>UPI Risk Monitor &mdash; OJT Project &mdash; 2026</footer>
+
+<script>
+const riskData = {"Low": 191784, "High": 8188, "Medium": 28};
+const fraudByType = {"CASH_IN": 0, "CASH_OUT": 4116, "DEBIT": 0, "PAYMENT": 0, "TRANSFER": 4097};
+const typeCounts  = {"CASH_OUT": 2237500, "PAYMENT": 2151495, "CASH_IN": 1399284, "TRANSFER": 532909, "DEBIT": 41432};
+const modelAucs   = {"Logistic Regression": 0.9955, "Random Forest": 0.9997, "XGBoost": 0.9995};
+
+new Chart(document.getElementById("riskPie"), {
+  type: "doughnut",
+  data: {
+    labels: Object.keys(riskData),
+    datasets: [{ data: Object.values(riskData),
+      backgroundColor: ["#2ecc71","#f39c12","#e74c3c"], borderWidth: 2 }]
+  },
+  options: { plugins: { legend: { labels: { color:"#ccc" } } } }
+});
+
+new Chart(document.getElementById("fraudBar"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(fraudByType),
+    datasets: [{ label:"Fraud Count", data: Object.values(fraudByType),
+      backgroundColor:"#e74c3c", borderRadius: 4 }]
+  },
+  options: { plugins: { legend: { labels: { color:"#ccc" } } },
+    scales: { x: { ticks: { color:"#ccc" } }, y: { ticks: { color:"#ccc" } } } }
+});
+
+new Chart(document.getElementById("typeBar"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(typeCounts),
+    datasets: [{ label:"Transactions", data: Object.values(typeCounts),
+      backgroundColor:"#3498db", borderRadius: 4 }]
+  },
+  options: { plugins: { legend: { labels: { color:"#ccc" } } },
+    scales: { x: { ticks: { color:"#ccc" } }, y: { ticks: { color:"#ccc" } } } }
+});
+
+new Chart(document.getElementById("aucBar"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(modelAucs),
+    datasets: [{ label:"AUC-ROC", data: Object.values(modelAucs),
+      backgroundColor:["#3498db","#2ecc71","#e74c3c"], borderRadius: 4 }]
+  },
+  options: {
+    plugins: { legend: { labels: { color:"#ccc" } } },
+    scales: {
+      x: { ticks: { color:"#ccc" } },
+      y: { min: 0.5, max: 1.0, ticks: { color:"#ccc" } }
+    }
+  }
+});
+
+setTimeout(() => location.reload(), 60000);
+</script>
+</body>
+</html>

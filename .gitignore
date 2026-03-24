@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+data/raw/paysim.csv
+data/raw/PS_20174392719_1491204439457_log.csv
+models/*.pkl
+.DS_Store
+*.egg-info/
+dist/
+build/
