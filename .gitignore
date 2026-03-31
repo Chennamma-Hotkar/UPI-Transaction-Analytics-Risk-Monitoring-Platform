@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+data/PS_20174392719_1491204439457_log.csv
+models/*.pkl
+.DS_Store

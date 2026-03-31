@@ -1,0 +1,18 @@
+{
+  "project": "UPI Transaction Analytics & Risk Monitoring Platform",
+  "dataset": "PaySim1",
+  "total_transactions": 100000,
+  "fraud_transactions": 141,
+  "fraud_rate_pct": 0.141,
+  "features_engineered": 31,
+  "best_model": "Logistic Regression",
+  "roc_auc": 1.0,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "fraud_capture_rate_pct": 97.33,
+  "review_burden_pct": 0.84,
+  "mule_accounts_detected": 103,
+  "generated": "2026-03-31T04:38:52.304656"
+}
