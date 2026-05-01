@@ -148,6 +148,6 @@ The monitoring dashboard provides:
 
 
 
-## License
+## Deploy
 
-This project was developed as part of an On-the-Job Training (OJT) program. All rights reserved by the authors.
+[UPI](https://upi-transaction-analytics-risk-moni.vercel.app/UPI%20Risk%20Analytics.html)
