@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UPI Risk Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* UPI Risk Analytics — Bloomberg-terminal density. Dark default, light variant. */
+
+:root, [data-theme="dark"]{
+  --bg: #0b0d10;
+  --bg-1: #11141a;
+  --bg-2: #161a21;
+  --bg-3: #1d222b;
+  --bg-hover: #1f2530;
+  --fg: #e7eaf0;
+  --fg-1: #b6bdc9;
+  --fg-2: #7c8492;
+  --fg-3: #4a525e;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --grid: rgba(255,255,255,0.04);
+  --accent: #4cc4d7;
+  --accent-soft: rgba(76,196,215,0.14);
+  --ok: #6ec96a;
+  --ok-soft: rgba(110,201,106,0.16);
+  --warn: #f0b049;
+  --warn-soft: rgba(240,176,73,0.16);
+  --bad: #ec5b5b;
+  --bad-soft: rgba(236,91,91,0.16);
+  --p2p: #8a7df0;
+  --merchant: #6ec96a;
+  --utility: #f0b049;
+  --retail: #4cc4d7;
+}
+
+[data-theme="light"]{
+  --bg: #f6f6f3;
+  --bg-1: #ffffff;
+  --bg-2: #f0f0eb;
+  --bg-3: #e6e6df;
+  --bg-hover: #ececea;
+  --fg: #181a1c;
+  --fg-1: #34383d;
+  --fg-2: #6a6f78;
+  --fg-3: #a8adb5;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.16);
+  --grid: rgba(0,0,0,0.05);
+  --accent: #0d8b9e;
+  --accent-soft: rgba(13,139,158,0.14);
+  --ok: #2f8c2a;
+  --ok-soft: rgba(47,140,42,0.14);
+  --warn: #b87515;
+  --warn-soft: rgba(184,117,21,0.14);
+  --bad: #c93a3a;
+  --bad-soft: rgba(201,58,58,0.14);
+  --p2p: #5d4dcf;
+  --merchant: #2f8c2a;
+  --utility: #b87515;
+  --retail: #0d8b9e;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html, body{height:100%;}
+body{
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+.mono{ font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum" 1; letter-spacing:-0.01em; }
+.num{ font-variant-numeric: tabular-nums; }
+.dim{ color: var(--fg-2); }
+.accent{ color: var(--accent); }
+.bad-fg{ color: var(--bad); }
+.warn-fg{ color: var(--warn); }
+.ok-fg{ color: var(--ok); }
+.bad-bg{ background: var(--bad); }
+.accent-bg{ background: var(--accent); }
+.cat-p2p-bg{ background: var(--p2p); }
+.cat-merchant-bg{ background: var(--merchant); }
+.cat-utility-bg{ background: var(--utility); }
+.cat-retail-bg{ background: var(--retail); }
+
+button{ font-family: inherit; font-size: inherit; cursor:pointer; border:0; background:transparent; color:inherit; }
+
+/* ─── App shell ─── */
+.app{
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: 44px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+.app.compact{ grid-template-columns: 56px 1fr; }
+.app.dense{ font-size: 11px; }
+
+.topbar{
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 14px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-1);
+}
+.brand{
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; letter-spacing: 0.04em; font-size: 13px;
+}
+.brand .logo{
+  width: 16px; height: 16px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 60% 0, 100% 50%, 60% 100%, 0 100%, 40% 50%);
+}
+.brand small{ font-weight: 500; color: var(--fg-2); letter-spacing: 0.06em; font-size: 10px; margin-left: 4px;}
+
+.topbar-search{
+  flex: 1; max-width: 360px;
+  height: 26px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 10px;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.topbar-search input{
+  flex: 1; background: transparent; border: 0; outline: 0; color: var(--fg);
+  font-family: inherit; font-size: inherit;
+}
+.topbar-search kbd{
+  font-size: 9px; padding: 1px 4px; border-radius: 3px;
+  background: var(--bg-2); color: var(--fg-2);
+  border: 0.5px solid var(--border);
+}
+
+.topbar-spacer{ flex:1; }
+.topbar-meta{
+  display: flex; align-items: center; gap: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--fg-2);
+}
+.topbar-meta .live{
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--ok);
+}
+.topbar-meta .live::before{
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ok); box-shadow: 0 0 6px var(--ok);
+  animation: pulse 1.6s infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ─── Sidebar ─── */
+.sidebar{
+  background: var(--bg-1);
+  border-right: 0.5px solid var(--border);
+  padding: 8px 0;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.nav-grp{
+  font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--fg-3); text-transform: uppercase;
+  padding: 12px 14px 4px;
+}
+.nav-item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 14px;
+  color: var(--fg-1);
+  font-size: 12px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.nav-item:hover{ background: var(--bg-2); }
+.nav-item.active{
+  background: var(--bg-2);
+  color: var(--fg);
+  border-left-color: var(--accent);
+}
+.nav-icon{
+  width: 14px; height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-2);
+}
+.nav-item.active .nav-icon{ color: var(--accent); }
+.nav-badge{
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-3); color: var(--fg-2);
+}
+.nav-badge.bad{ background: var(--bad-soft); color: var(--bad); }
+.nav-badge.warn{ background: var(--warn-soft); color: var(--warn); }
+.app.compact .nav-item span:not(.nav-badge), .app.compact .nav-grp{ display:none; }
+.app.compact .nav-item{ justify-content: center; padding: 8px; }
+
+.sidebar-foot{
+  margin-top: auto;
+  padding: 12px 14px;
+  border-top: 0.5px solid var(--border);
+  font-size: 10px; color: var(--fg-2);
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sidebar-foot .stat{
+  display: flex; justify-content: space-between;
+}
+
+/* ─── Main ─── */
+.main{
+  overflow: auto;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+/* ─── Page header ─── */
+.page-hd{
+  display: flex; align-items: center; gap: 14px;
+  padding-bottom: 4px;
+}
+.page-hd h1{
+  font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.page-hd .crumbs{
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg-2);
+}
+.page-hd .actions{ margin-left:auto; display:flex; gap: 6px; }
+.btn-sm{
+  height: 24px; padding: 0 10px;
+  font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg-1); color: var(--fg-1);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-sm:hover{ background: var(--bg-2); color: var(--fg); }
+.btn-sm.primary{ background: var(--accent); color: #001318; border-color: var(--accent); }
+
+/* ─── Card ─── */
+.card{
+  background: var(--bg-1);
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.card-hd{
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.card-title{
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--fg-2); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.pulse-dot{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--bad); display: inline-block;
+  box-shadow: 0 0 6px var(--bad);
+  animation: pulse 1.4s infinite;
+}
+
+/* ─── Layouts ─── */
+.row{ display: grid; gap: 10px; }
+.r2{ grid-template-columns: repeat(2, 1fr); }
+.r3{ grid-template-columns: repeat(3, 1fr); }
+.r4{ grid-template-columns: repeat(4, 1fr); }
+.r6{ grid-template-columns: repeat(6, 1fr); }
+.r8{ grid-template-columns: repeat(8, 1fr); }
+.r-21{ grid-template-columns: 2fr 1fr; }
+.r-12{ grid-template-columns: 1fr 2fr; }
+.r-32{ grid-template-columns: 3fr 2fr; }
+
+/* ─── KPI ─── */
+.kpi{
+  background: var(--bg-1);
+  border: 0.5px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+.kpi-hd{
+  display: flex; justify-content: space-between; align-items: center;
+}
+.kpi .lbl{
+  font-size: 9px; letter-spacing: 0.1em; color: var(--fg-2); font-weight: 600;
+}
+.kpi-delta{ font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.kpi-delta.good{ color: var(--ok); }
+.kpi-delta.bad{ color: var(--bad); }
+.kpi-delta.neutral{ color: var(--fg-2); }
+.kpi-val{
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  font-size: 20px; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-foot{
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: auto;
+}
+.kpi-sub{ font-size: 10px; color: var(--fg-2); font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Pills ─── */
+.risk-pill{
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; height: 18px;
+  padding: 0 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.risk-pill.good{ background: var(--ok-soft); color: var(--ok); }
+.risk-pill.warn{ background: var(--warn-soft); color: var(--warn); }
+.risk-pill.bad{ background: var(--bad-soft); color: var(--bad); }
+.cat-pill{
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px; font-weight: 500;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cat-p2p{ background: rgba(138,125,240,0.18); color: var(--p2p); }
+.cat-merchant{ background: rgba(110,201,106,0.18); color: var(--merchant); }
+.cat-utility{ background: rgba(240,176,73,0.18); color: var(--utility); }
+.cat-retail{ background: rgba(76,196,215,0.18); color: var(--retail); }
+.flag-pill{
+  display: inline-block; padding: 0 5px; height: 16px; line-height: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+  border-radius: 2px;
+}
+.flag-pill.bad{ background: var(--bad); color: #fff; }
+.flag-pill.warn{ background: var(--warn-soft); color: var(--warn); border: 0.5px solid var(--warn); }
+.badge{
+  display: inline-flex; align-items: center;
+  padding: 1px 6px; height: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.04em;
+  border-radius: 2px;
+}
+.badge.bad{ background: var(--bad-soft); color: var(--bad); }
+.badge.warn{ background: var(--warn-soft); color: var(--warn); }
+.badge.ok{ background: var(--ok-soft); color: var(--ok); }
+.badge.accent{ background: var(--accent-soft); color: var(--accent); }
+
+/* ─── Live feed ─── */
+.live-card{ padding: 0; overflow: hidden; }
+.live-card .card-hd{ padding: 10px 12px; margin: 0; border-bottom: 0.5px solid var(--border); }
+.feed-table{
+  display: flex; flex-direction: column;
+}
+.feed-row{
+  display: grid;
+  grid-template-columns: 110px 100px 90px 72px 80px 100px 90px 56px 72px;
+  gap: 8px;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  align-items: center;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+}
+.feed-row > span{ overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed-row:hover{ background: var(--bg-2); }
+.feed-row.alert{ background: rgba(236,91,91,0.04); }
+.feed-row.alert:hover{ background: rgba(236,91,91,0.10); }
+.feed-hd{
+  font-size: 9px; color: var(--fg-2); font-weight: 600;
+  letter-spacing: 0.08em; padding: 6px 12px;
+  border-bottom: 0.5px solid var(--border-strong);
+  background: var(--bg-2);
+  cursor: default;
+}
+.feed-hd:hover{ background: var(--bg-2); }
+.feed-body{ overflow-y: auto; }
+.feed-body::-webkit-scrollbar{ width: 6px; }
+.feed-body::-webkit-scrollbar-thumb{ background: var(--border-strong); border-radius: 3px;}
+.feed-foot{
+  display: flex; justify-content: space-between;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--fg-2);
+  border-top: 0.5px solid var(--border);
+  background: var(--bg-2);
+}
+@keyframes flashIn{ from{ background: var(--accent-soft); } to{ background: transparent; } }
+.feed-row.new{ animation: flashIn 1s ease; }
+
+/* ─── Segmented ─── */
+.seg{
+  display: inline-flex;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 22px;
+}
+.seg-btn{
+  height: 100%;
+  padding: 0 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--fg-2);
+  border-right: 0.5px solid var(--border);
+}
+.seg-btn:last-child{ border-right: 0; }
+.seg-btn:hover{ color: var(--fg); background: var(--bg-2); }
+.seg-btn.active{ background: var(--accent-soft); color: var(--accent); }
+
+/* ─── Histogram ─── */
+.hist{
+  display: flex; align-items: flex-end; justify-content: space-between;
+  height: 130px;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+.hist-col{
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  height: 100%;
+  gap: 4px;
+}
+.hist-cnt{ font-size: 9px; color: var(--fg-2); }
+.hist-bar-wrap{
+  flex: 1; width: 100%;
+  display: flex; align-items: flex-end;
+}
+.hist-bar{
+  width: 100%; min-height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+.hist-bar.green{ background: var(--ok); }
+.hist-bar.amber{ background: var(--warn); }
+.hist-bar.red{ background: var(--bad); }
+.hist-lbl{ font-size: 9px; color: var(--fg-3); }
+.hist-foot{
+  display: flex; gap: 14px; padding-top: 6px;
+  border-top: 0.5px solid var(--border);
+  font-size: 10px; color: var(--fg-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.sw{ display: inline-block; width: 8px; height: 8px; border-radius: 1px; margin-right: 5px; vertical-align: middle; }
+.sw.green{ background: var(--ok); }
+.sw.amber{ background: var(--warn); }
+.sw.red{ background: var(--bad); }
+
+/* ─── Velocity ─── */
+.vel-num{
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 26px; color: var(--bad);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.vel-unit{ font-size: 11px; color: var(--fg-2); font-weight: 400; margin-left: 2px; }
+.vel-bars{
+  display: flex; align-items: flex-end; gap: 3px; height: 50px; margin: 6px 0;
+}
+.vel-b{
+  flex: 1; min-height: 3px;
+  background: var(--accent-soft); border-radius: 1px;
+}
+.vel-b.hot{ background: var(--bad); }
+.vel-foot{ font-size: 10px; }
+
+/* ─── Bank table ─── */
+.bank-tbl, .model-tbl, .mule-tbl{
+  display: flex; flex-direction: column;
+}
+.bank-row{
+  display: grid;
+  grid-template-columns: 50px 1fr 60px 50px 70px 60px;
+  gap: 6px; align-items: center;
+  padding: 4px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 11px;
+}
+.bank-row:last-child{ border-bottom: 0; }
+.bank-hd{
+  font-size: 9px; color: var(--fg-2); font-weight: 600;
+  letter-spacing: 0.08em; padding-bottom: 4px;
+  border-bottom: 0.5px solid var(--border-strong);
+}
+.bank-bar{
+  display: block; height: 4px; background: var(--bg-3); border-radius: 2px; overflow: hidden;
+}
+.bank-bar > span{ display: block; height: 100%; background: var(--bad); }
+
+/* ─── Category mix ─── */
+.catmix{ display: flex; flex-direction: column; gap: 8px; }
+.catmix-row{ display: flex; flex-direction: column; gap: 4px; }
+.catmix-hd{ display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+.catmix-bars{ display: flex; flex-direction: column; gap: 3px; }
+.catmix-bar{
+  position: relative;
+  height: 16px;
+  background: var(--bg-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.catmix-bar .fill{
+  display: block; height: 100%;
+}
+.catmix-bar label{
+  position: absolute; left: 6px; top: 0; height: 16px; line-height: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: var(--fg);
+  mix-blend-mode: difference;
+}
+
+/* ─── Geo ─── */
+.geo-list{ display: flex; flex-direction: column; gap: 4px; }
+.geo-row{
+  display: grid;
+  grid-template-columns: 80px 1fr 36px 50px;
+  gap: 6px; align-items: center;
+  padding: 3px 0;
+  font-size: 11px;
+}
+.geo-city{ font-size: 11px; }
+.geo-bar{
+  display: block; height: 6px; background: var(--bg-3); border-radius: 2px; overflow: hidden;
+}
+.geo-bar > span{ display: block; height: 100%; }
+
+/* ─── Patterns ─── */
+.pat-list{ display: flex; flex-direction: column; gap: 6px; }
+.pat-row{
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 5px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.pat-row:last-child{ border-bottom: 0; }
+.pat-hd{
+  display: grid;
+  grid-template-columns: 8px 1fr 32px 28px;
+  gap: 8px; align-items: center;
+  font-size: 11px;
+}
+.pat-name{ font-weight: 500; }
+.sev{
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+}
+.sev-critical{ background: var(--bad); box-shadow: 0 0 6px var(--bad); }
+.sev-high{ background: var(--warn); }
+.sev-medium{ background: var(--accent); }
+.pat-tags{
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding-left: 16px;
+}
+.chip{
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  color: var(--fg-2);
+  border: 0.5px solid var(--border);
+}
+
+/* ─── Mule network ─── */
+.mule-wrap{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mule-graph{ width: 100%; height: 220px; }
+.mule-row{
+  display: grid;
+  grid-template-columns: 60px 40px 60px 36px 40px;
+  gap: 6px; align-items: center;
+  padding: 3px 0;
+  font-size: 11px;
+  border-bottom: 0.5px solid var(--border);
+}
+.mule-row:last-child{ border-bottom: 0; }
+.mule-hd{ font-size: 9px; color: var(--fg-2); font-weight: 600; letter-spacing: 0.08em; border-bottom: 0.5px solid var(--border-strong); }
+
+/* ─── Model perf ─── */
+.model-row{
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 0.7fr 0.6fr 0.7fr;
+  gap: 6px; align-items: center;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 0.5px solid var(--border);
+}
+.model-row:last-child{ border-bottom: 0; }
+.model-hd{ font-size: 9px; color: var(--fg-2); font-weight: 600; letter-spacing: 0.08em; border-bottom: 0.5px solid var(--border-strong); }
+.status{
+  display: inline-block; padding: 1px 5px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+  border-radius: 2px;
+  text-align: center;
+}
+.status-live{ background: var(--ok-soft); color: var(--ok); }
+.status-shadow{ background: var(--accent-soft); color: var(--accent); }
+.status-fallback{ background: var(--bg-3); color: var(--fg-2); }
+
+/* ─── Alerts ─── */
+.alert-list{ display: flex; flex-direction: column; }
+.alert-row{
+  display: grid;
+  grid-template-columns: 44px 1fr 90px 64px;
+  gap: 8px; align-items: center;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+}
+.alert-row:last-child{ border-bottom: 0; }
+.alert-row:hover{ background: var(--bg-2); }
+.alert-tag{
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
+  height: 16px; border-radius: 2px;
+}
+.tag-crit{ background: var(--bad); color: #fff; }
+.tag-warn{ background: var(--warn-soft); color: var(--warn); border: 0.5px solid var(--warn); }
+.tag-info{ background: var(--accent-soft); color: var(--accent); }
+.alert-msg{ font-size: 11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ─── Drawer ─── */
+.drawer-bg{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: flex; justify-content: flex-end;
+}
+.drawer{
+  width: 460px; height: 100%;
+  background: var(--bg-1);
+  border-left: 0.5px solid var(--border-strong);
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px;
+  animation: slideIn 0.18s ease;
+}
+@keyframes slideIn { from{ transform: translateX(100%); } to{ transform: translateX(0); } }
+.drawer-hd{ display: flex; justify-content: space-between; align-items: flex-start; }
+.dr-id{ font-size: 16px; font-weight: 600; }
+.dr-time{ font-size: 10px; margin-top: 2px; }
+.x-btn{
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 3px; color: var(--fg-2);
+}
+.x-btn:hover{ background: var(--bg-2); color: var(--fg); }
+.drawer-banner{
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+}
+.dr-amt{ font-size: 18px; font-weight: 600; }
+.drawer-section{ display: flex; flex-direction: column; gap: 6px; }
+.dr-hd{
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--fg-2); text-transform: uppercase;
+  padding-bottom: 3px;
+  border-bottom: 0.5px solid var(--border);
+}
+.dr-features{ display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+.dr-feat{
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 11px;
+}
+.dr-k{ color: var(--fg-2); }
+.dr-v{ font-family: 'Geist', sans-serif; }
+.dr-v.mono{ font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.dr-rules{ display: flex; flex-direction: column; gap: 3px; }
+.dr-rule{
+  display: grid;
+  grid-template-columns: 14px 1fr 40px;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  background: var(--bg-2);
+}
+.dr-rule.hit{ background: var(--bad-soft); color: var(--bad); }
+.dr-rule.miss{ color: var(--fg-3); }
+.drawer-actions{ display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.btn{
+  flex: 1; min-width: 80px;
+  height: 32px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 0.5px solid var(--border-strong);
+}
+.btn.bad{ background: var(--bad); color: #fff; border-color: var(--bad); }
+.btn.warn{ background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+.btn.ok{ background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+.btn.ghost{ background: transparent; color: var(--fg-1); }
+.btn:hover{ filter: brightness(1.08); }
+
+/* ─── Layout-specific ─── */
+.layout-command .live-card{ grid-column: span 2; }
+.layout-trader .feed-row{ padding: 3px 12px; font-size: 10px; }
+.layout-trader .card{ padding: 6px 8px; }
+.layout-trader .card-hd{ margin-bottom: 4px; }
+.layout-trader{ font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- ── Data ── -->
+  <script type="text/babel">
+const BANKS = ['SBI','ICICI','HDFC','Axis','PNB','BOB','Union','Canara','Kotak','IDFC'];
+const CATEGORIES = ['P2P','Merchant','Utility','Retail'];
+const CITIES = ['Mumbai','Delhi','Bangalore','Chennai','Hyderabad','Pune','Kolkata','Ahmedabad'];
+const APPS = ['GPay','PhonePe','Paytm','BHIM','CRED','Amazon Pay'];
+
+function rid(n=6){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+  let s=''; for(let i=0;i<n;i++) s+=c[Math.floor(Math.random()*c.length)];
+  return s;
+}
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+function genTxn(now=Date.now()){
+  const cat = pick(CATEGORIES);
+  const amt = cat==='Merchant' ? Math.round(50+Math.random()*49950)
+            : cat==='Utility' ? Math.round(200+Math.random()*9800)
+            : cat==='Retail' ? Math.round(100+Math.random()*19900)
+            : Math.round(50+Math.random()*49950);
+  const risk = Math.random()<0.04 ? 70+Math.round(Math.random()*30)
+             : Math.random()<0.12 ? 40+Math.round(Math.random()*30)
+             : Math.round(Math.random()*40);
+  const flag = risk>=70 ? 'BLOCK' : risk>=40 ? 'REVIEW' : '';
+  const t = new Date(now - Math.random()*900000);
+  return {
+    id: 'UPI'+rid(7),
+    amount: amt,
+    category: cat,
+    bank: pick(BANKS),
+    bankTo: pick(BANKS),
+    city: pick(CITIES),
+    app: pick(APPS),
+    timestamp: t,
+    risk,
+    flag,
+    payer: 'user'+Math.floor(1000+Math.random()*8999)+'@'+pick(['oksbi','okicici','okhdfc','okaxis','paytm','ybl']),
+    payee: 'merchant'+Math.floor(100+Math.random()*899)+'@'+pick(['oksbi','okicici','okhdfc','okaxis','paytm','ybl']),
+    device: 'AND-'+rid(4),
+    ip: [Math.floor(Math.random()*223)+1, Math.floor(Math.random()*255), Math.floor(Math.random()*255), Math.floor(Math.random()*255)].join('.'),
+    velocity: Math.floor(Math.random()*30),
+    newDevice: Math.random()<0.15,
+    newPayee: Math.random()<0.22,
+  };
+}
+
+function genFeed(n=80){
+  const out=[]; const now=Date.now();
+  for(let i=0;i<n;i++) out.push(genTxn(now - i*15000));
+  return out;
+}
+
+const KPIS = [
+  {key:'tpv',      label:'TPV TODAY',      value:'₹2,847 Cr', delta:'+12.4%', dir:'up',   tone:'neutral', sub:'48.2M txns'},
+  {key:'blocked',  label:'FRAUD BLOCKED',  value:'₹18.4 Cr',  delta:'+34%',   dir:'up',   tone:'good',    sub:'2,391 txns'},
+  {key:'velocity', label:'FRAUD VELOCITY', value:'21/hr',      delta:'+600%',  dir:'up',   tone:'bad',     sub:'attack wave'},
+  {key:'recall',   label:'MODEL RECALL',   value:'94.1%',      delta:'+0.3pp', dir:'up',   tone:'good',    sub:'no drift'},
+  {key:'fpr',      label:'FALSE POSITIVE', value:'1.8%',       delta:'-0.2pp', dir:'down', tone:'good',    sub:'1,158 blocked'},
+  {key:'p99',      label:'P99 LATENCY',    value:'42ms',       delta:'-8ms',   dir:'down', tone:'good',    sub:'SLO 100ms'},
+  {key:'mules',    label:'MULE NETWORK',   value:'147',        delta:'+23',    dir:'up',   tone:'bad',     sub:'tracked nodes'},
+  {key:'analyst',  label:'QUEUE DEPTH',    value:'89',         delta:'-12',    dir:'down', tone:'neutral', sub:'avg 4.2 min'},
+];
+
+const RISK_DIST = [
+  {bucket:'0-9',   count:38420, color:'green'},
+  {bucket:'10-19', count:6210,  color:'green'},
+  {bucket:'20-29', count:2104,  color:'green'},
+  {bucket:'30-39', count:892,   color:'amber'},
+  {bucket:'40-49', count:441,   color:'amber'},
+  {bucket:'50-59', count:218,   color:'amber'},
+  {bucket:'60-69', count:104,   color:'red'},
+  {bucket:'70-79', count:58,    color:'red'},
+  {bucket:'80-89', count:31,    color:'red'},
+  {bucket:'90-99', count:14,    color:'red'},
+];
+
+const BANK_STATS = [
+  {bank:'SBI',   txns:8420000, fraud:842, fraudRate:0.0100, vol:'612 Cr'},
+  {bank:'HDFC',  txns:7210000, fraud:432, fraudRate:0.0060, vol:'548 Cr'},
+  {bank:'ICICI', txns:6890000, fraud:618, fraudRate:0.0090, vol:'511 Cr'},
+  {bank:'Axis',  txns:5240000, fraud:471, fraudRate:0.0090, vol:'389 Cr'},
+  {bank:'PNB',   txns:4180000, fraud:502, fraudRate:0.0120, vol:'298 Cr'},
+  {bank:'Kotak', txns:3120000, fraud:218, fraudRate:0.0070, vol:'234 Cr'},
+  {bank:'BOB',   txns:2890000, fraud:289, fraudRate:0.0100, vol:'201 Cr'},
+  {bank:'Union', txns:2410000, fraud:265, fraudRate:0.0110, vol:'168 Cr'},
+];
+
+const CATEGORY_MIX = [
+  {cat:'P2P',      share:0.42, fraudShare:0.61, txns:'20.2M', tone:'p2p'},
+  {cat:'Merchant', share:0.31, fraudShare:0.18, txns:'15.0M', tone:'merchant'},
+  {cat:'Utility',  share:0.16, fraudShare:0.04, txns:'7.7M',  tone:'utility'},
+  {cat:'Retail',   share:0.11, fraudShare:0.17, txns:'5.3M',  tone:'retail'},
+];
+
+const GEO_ANOMALIES = [
+  {city:'Mumbai',    count:82, baseline:19, pct:332,  lat:19.0, lon:72.8},
+  {city:'Delhi',     count:31, baseline:27, pct:15,   lat:28.6, lon:77.2},
+  {city:'Bangalore', count:18, baseline:19, pct:-5,   lat:12.9, lon:77.6},
+  {city:'Chennai',   count:11, baseline:10, pct:10,   lat:13.0, lon:80.2},
+  {city:'Hyderabad', count:9,  baseline:9,  pct:0,    lat:17.4, lon:78.5},
+  {city:'Pune',      count:14, baseline:8,  pct:75,   lat:18.5, lon:73.9},
+  {city:'Kolkata',   count:7,  baseline:11, pct:-36,  lat:22.6, lon:88.4},
+  {city:'Ahmedabad', count:6,  baseline:7,  pct:-14,  lat:23.0, lon:72.6},
+];
+
+const ATTACK_PATTERNS = [
+  {name:'Midnight drain', count:12, severity:'critical', tags:['off-hours','account drained','round amount'], change:'+8'},
+  {name:'Mule chain',     count:8,  severity:'critical', tags:['high-freq dest','balance unchanged'],         change:'+3'},
+  {name:'Structuring',    count:6,  severity:'high',     tags:['round amount','serial origin'],               change:'+1'},
+  {name:'SIM swap',       count:4,  severity:'high',     tags:['new device','immediate drain'],               change:'+2'},
+  {name:'QR phishing',    count:3,  severity:'medium',   tags:['static QR','small amount'],                  change:'0'},
+  {name:'OTP intercept',  count:2,  severity:'medium',   tags:['new device','OTP velocity'],                 change:'-1'},
+];
+
+const MULE_NODES = [
+  {id:'M-A7X', txns:47, inflow:'₹8.2L', outflow:'₹8.1L', degree:12, risk:98},
+  {id:'M-B2K', txns:38, inflow:'₹6.4L', outflow:'₹6.3L', degree:9,  risk:95},
+  {id:'M-C9M', txns:29, inflow:'₹4.8L', outflow:'₹4.7L', degree:7,  risk:91},
+  {id:'M-D4P', txns:22, inflow:'₹3.1L', outflow:'₹3.0L', degree:5,  risk:87},
+  {id:'M-E1R', txns:17, inflow:'₹2.4L', outflow:'₹2.3L', degree:4,  risk:82},
+  {id:'M-F6T', txns:11, inflow:'₹1.6L', outflow:'₹1.5L', degree:3,  risk:74},
+];
+
+const ALERTS_SEED = [
+  {level:'CRIT', msg:'High-value TRANSFER ₹4.82L — new account',          time:'14:32:11', txn:'UPI4FZ8K2'},
+  {level:'CRIT', msg:'Mule chain: 12 senders → 1 dest in 30 min',         time:'14:31:47', txn:'UPI8H2NQ4'},
+  {level:'WARN', msg:'Structuring: 9 × ₹10,000 same origin 8 min',        time:'14:30:22', txn:'UPI2KX7P9'},
+  {level:'WARN', msg:'Mumbai fraud spike — 82 cases this hour',            time:'14:29:05', txn:'—'},
+  {level:'CRIT', msg:'SIM swap detected — drain in progress',              time:'14:28:51', txn:'UPI9MV3R6'},
+  {level:'INFO', msg:'Model retrain scheduled — AUC 0.9998',               time:'14:28:00', txn:'—'},
+  {level:'WARN', msg:'Velocity threshold breach: device AND-X29F',         time:'14:27:33', txn:'UPI7BCD8E'},
+];
+
+const MODEL_PERF = [
+  {name:'XGBoost v4.2',     auc:0.9998, recall:94.1, precision:79.2, latency:42,  status:'live',     tone:'good'},
+  {name:'Random Forest',    auc:0.9821, recall:88.3, precision:82.1, latency:118, status:'shadow',   tone:'neutral'},
+  {name:'Isolation Forest', auc:0.9412, recall:71.2, precision:68.8, latency:18,  status:'fallback', tone:'neutral'},
+  {name:'Logistic Regression', auc:0.8921, recall:62.4, precision:91.2, latency:3,   status:'live',     tone:'good'},
+];
+
+const VELOCITY_SERIES = [3,4,3,5,4,6,5,7,6,8,7,9,12,14,18,21];
+
+Object.assign(window, {
+  BANKS, CATEGORIES, CITIES, APPS,
+  rid, pick, genTxn, genFeed,
+  KPIS, RISK_DIST, BANK_STATS, CATEGORY_MIX, GEO_ANOMALIES,
+  ATTACK_PATTERNS, MULE_NODES, ALERTS_SEED, MODEL_PERF, VELOCITY_SERIES
+});
+  </script>
+
+  <!-- ── Tweaks Panel ── -->
+  <script type="text/babel">
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+  .twk-field{appearance:none;width:100%;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;overflow-wrap:anywhere}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+`;
+
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel"
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+function TweakSection({ label }) {
+  return <div className="twk-sect">{label}</div>;
+}
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => { if (trackRef.current) { const v = segAt(ev.clientX); if (v !== valueRef.current) onChange(v); } };
+    const up = () => { setDragging(false); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`, width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>{o.label}</button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+function TweakColor({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <input type="color" className="twk-swatch" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect, TweakColor,
+});
+  </script>
+
+  <!-- ── Components ── -->
+  <script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+function Spark({values, color, height=24, width=80, area=true}){
+  const max = Math.max(...values), min = Math.min(...values);
+  const range = max-min || 1;
+  const pts = values.map((v,i)=>{
+    const x = (i/(values.length-1))*width;
+    const y = height - ((v-min)/range)*height;
+    return [x,y];
+  });
+  const d = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const fill = area ? `${d} L${width} ${height} L0 ${height} Z` : null;
+  return (
+    <svg width={width} height={height} style={{display:'block',overflow:'visible'}}>
+      {area && <path d={fill} fill={color} opacity="0.12"/>}
+      <path d={d} fill="none" stroke={color} strokeWidth="1.25"/>
+      <circle cx={pts[pts.length-1][0]} cy={pts[pts.length-1][1]} r="2" fill={color}/>
+    </svg>
+  );
+}
+
+function KpiCard({k, dense, sparkData}){
+  const toneCol = k.tone==='good' ? 'var(--ok)' : k.tone==='bad' ? 'var(--bad)' : 'var(--fg-2)';
+  const arrow = k.dir==='up' ? '▲' : k.dir==='down' ? '▼' : '·';
+  return (
+    <div className="kpi" style={{borderTopColor: k.tone==='bad' ? 'var(--bad)' : k.tone==='good' ? 'var(--ok)' : 'var(--accent)'}}>
+      <div className="kpi-hd">
+        <span className="lbl">{k.label}</span>
+        <span className={`kpi-delta ${k.tone}`}>{arrow} {k.delta}</span>
+      </div>
+      <div className="kpi-val">{k.value}</div>
+      <div className="kpi-foot">
+        <span className="kpi-sub">{k.sub}</span>
+        {sparkData && <Spark values={sparkData} color={toneCol} width={dense?56:72} height={18}/>}
+      </div>
+    </div>
+  );
+}
+
+function RiskPill({score}){
+  const tone = score>=70?'bad':score>=40?'warn':'good';
+  return <span className={`risk-pill ${tone}`}>{score}</span>;
+}
+function CatPill({cat}){
+  return <span className={`cat-pill cat-${cat.toLowerCase()}`}>{cat}</span>;
+}
+function FlagPill({flag}){
+  if(!flag) return <span className="dim">—</span>;
+  return <span className={`flag-pill ${flag==='BLOCK'?'bad':'warn'}`}>{flag}</span>;
+}
+
+function LiveFeed({feed, filter, setFilter, onSelect, animSpeed, dense, paused, setPaused}){
+  const filtered = useMemo(()=>{
+    return feed.filter(t=>{
+      if(filter.kind==='all') return true;
+      if(filter.kind==='fraud') return t.flag==='BLOCK';
+      if(filter.kind==='high') return t.risk>=40;
+      if(filter.kind==='p2p') return t.category==='P2P';
+      return true;
+    });
+  },[feed,filter]);
+  const fmt = (n) => '₹'+n.toLocaleString('en-IN');
+  const time = (d) => d.toTimeString().slice(0,8);
+  return (
+    <div className="card live-card">
+      <div className="card-hd">
+        <span className="card-title">LIVE TRANSACTION FEED <span className="pulse-dot"/></span>
+        <div className="seg">
+          {[['all','All'],['fraud','Fraud'],['high','High risk'],['p2p','P2P']].map(([k,l])=>(
+            <button key={k} className={'seg-btn'+(filter.kind===k?' active':'')} onClick={()=>setFilter({...filter,kind:k})}>{l}</button>
+          ))}
+          <button className={'seg-btn'+(paused?' active':'')} onClick={()=>setPaused(!paused)} title="Pause/resume">{paused?'▶':'❚❚'}</button>
+        </div>
+      </div>
+      <div className="feed-table">
+        <div className="feed-row feed-hd">
+          <span>UPI ID</span><span>AMOUNT</span><span>CATEGORY</span><span>BANK</span>
+          <span>APP</span><span>CITY</span><span>TIMESTAMP</span><span>RISK</span><span>FLAG</span>
+        </div>
+        <div className="feed-body" style={{maxHeight: dense?'460px':'520px'}}>
+          {filtered.slice(0,40).map((t,i)=>(
+            <div key={t.id+i} className={'feed-row'+(t.flag==='BLOCK'?' alert':'')} onClick={()=>onSelect(t)}>
+              <span className="mono accent">{t.id}</span>
+              <span className="mono num">{fmt(t.amount)}</span>
+              <span><CatPill cat={t.category}/></span>
+              <span className="mono">{t.bank}</span>
+              <span className="mono dim">{t.app}</span>
+              <span className="mono dim">{t.city}</span>
+              <span className="mono dim">{time(t.timestamp)}</span>
+              <span><RiskPill score={t.risk}/></span>
+              <span><FlagPill flag={t.flag}/></span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="feed-foot">
+        <span>{filtered.length} txn · streaming @ {animSpeed===0?'paused':animSpeed+'/s'}</span>
+        <span className="dim">P99 42ms · ingest healthy</span>
+      </div>
+    </div>
+  );
+}
+
+function RiskDistribution(){
+  const max = Math.max(...RISK_DIST.map(d=>d.count));
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">RISK SCORE DISTRIBUTION</span><span className="dim mono">48.2M txns / 24h</span></div>
+      <div className="hist">
+        {RISK_DIST.map(d=>(
+          <div key={d.bucket} className="hist-col">
+            <div className="hist-cnt mono">{d.count>=1000?(d.count/1000).toFixed(1)+'k':d.count}</div>
+            <div className="hist-bar-wrap">
+              <div className={`hist-bar ${d.color}`} style={{height: Math.max(2, Math.log(d.count+1)/Math.log(max+1)*100)+'%'}}/>
+            </div>
+            <div className="hist-lbl mono">{d.bucket}</div>
+          </div>
+        ))}
+      </div>
+      <div className="hist-foot">
+        <span><i className="sw green"/>Safe (0–39)</span>
+        <span><i className="sw amber"/>Review (40–69)</span>
+        <span><i className="sw red"/>Block (70+)</span>
+      </div>
+    </div>
+  );
+}
+
+function VelocityCard(){
+  const max = Math.max(...VELOCITY_SERIES);
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">FRAUD VELOCITY · 6H</span><span className="badge bad">ATTACK WAVE</span></div>
+      <div className="vel-num">21<span className="vel-unit">/hr</span></div>
+      <div className="vel-bars">
+        {VELOCITY_SERIES.map((v,i)=>(
+          <div key={i} className={'vel-b'+(v>10?' hot':'')} style={{height:(v/max*100)+'%'}}/>
+        ))}
+      </div>
+      <div className="vel-foot mono dim">threshold breach @ 3/hr · +600% vs baseline</div>
+    </div>
+  );
+}
+
+function BankBreakdown(){
+  const maxFraud = Math.max(...BANK_STATS.map(b=>b.fraudRate));
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">BANK-WISE FRAUD RATE</span><span className="dim mono">last 24h</span></div>
+      <div className="bank-tbl">
+        <div className="bank-row bank-hd">
+          <span>BANK</span><span>VOLUME</span><span>TXNS</span><span>FRAUD</span><span>RATE</span><span></span>
+        </div>
+        {BANK_STATS.map(b=>(
+          <div key={b.bank} className="bank-row">
+            <span className="mono">{b.bank}</span>
+            <span className="mono num">{b.vol}</span>
+            <span className="mono num dim">{(b.txns/1e6).toFixed(2)}M</span>
+            <span className="mono num">{b.fraud}</span>
+            <span className={`mono num ${b.fraudRate>0.01?'bad-fg':'ok-fg'}`}>{(b.fraudRate*100).toFixed(3)}%</span>
+            <span className="bank-bar"><span style={{width:(b.fraudRate/maxFraud*100)+'%'}}/></span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CategoryMix(){
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">CATEGORY MIX</span><span className="dim mono">share / fraud share</span></div>
+      <div className="catmix">
+        {CATEGORY_MIX.map(c=>(
+          <div key={c.cat} className="catmix-row">
+            <div className="catmix-hd">
+              <CatPill cat={c.cat}/>
+              <span className="mono dim">{c.txns}</span>
+            </div>
+            <div className="catmix-bars">
+              <div className="catmix-bar"><span className={`fill cat-${c.tone}-bg`} style={{width:(c.share*100)+'%'}}/><label>vol {(c.share*100).toFixed(0)}%</label></div>
+              <div className="catmix-bar"><span className="fill bad-bg" style={{width:(c.fraudShare*100)+'%'}}/><label>fraud {(c.fraudShare*100).toFixed(0)}%</label></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GeoAnomaly(){
+  const max = Math.max(...GEO_ANOMALIES.map(g=>g.count));
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">GEOGRAPHIC ANOMALY</span><span className="dim mono">city · vs 30d baseline</span></div>
+      <div className="geo-list">
+        {GEO_ANOMALIES.map(g=>{
+          const spike = g.pct>50;
+          return (
+            <div key={g.city} className="geo-row">
+              <span className="geo-city">{g.city}</span>
+              <span className="geo-bar"><span className={spike?'bad-bg':'accent-bg'} style={{width:(g.count/max*100)+'%'}}/></span>
+              <span className="mono num">{g.count}</span>
+              <span className={'mono '+(g.pct>50?'bad-fg':g.pct>0?'warn-fg':g.pct<-10?'ok-fg':'dim')}>{g.pct>0?'+':''}{g.pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AttackPatterns(){
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">ATTACK PATTERNS · 1H</span><span className="dim mono">detector v4.2</span></div>
+      <div className="pat-list">
+        {ATTACK_PATTERNS.map(p=>(
+          <div key={p.name} className="pat-row">
+            <div className="pat-hd">
+              <span className={`sev sev-${p.severity}`}/>
+              <span className="pat-name">{p.name}</span>
+              <span className={'mono '+(p.severity==='critical'?'bad-fg':p.severity==='high'?'warn-fg':'dim')}>{p.count}</span>
+              <span className="mono dim">{p.change!=='0'?p.change:'—'}</span>
+            </div>
+            <div className="pat-tags">
+              {p.tags.map(t=><span key={t} className="chip">{t}</span>)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MuleNetwork(){
+  const nodes = MULE_NODES;
+  const cx = 180, cy = 110, r = 80;
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">MULE NETWORK · DETECTED CHAINS</span><span className="badge bad">147 NODES</span></div>
+      <div className="mule-wrap">
+        <svg className="mule-graph" viewBox="0 0 360 220">
+          {nodes.map((n,i)=>{
+            const a = (i/nodes.length)*Math.PI*2 - Math.PI/2;
+            const x = cx + Math.cos(a)*r;
+            const y = cy + Math.sin(a)*r;
+            return <line key={'l'+i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--fg-3)" strokeWidth="0.5" strokeDasharray="2 2"/>;
+          })}
+          {nodes.map((n,i)=>{
+            const a = (i/nodes.length)*Math.PI*2 - Math.PI/2;
+            const x = cx + Math.cos(a)*r;
+            const y = cy + Math.sin(a)*r;
+            const sz = 4+n.degree*0.7;
+            return (
+              <g key={n.id}>
+                <circle cx={x} cy={y} r={sz} fill="var(--bad)" opacity="0.85"/>
+                <circle cx={x} cy={y} r={sz+3} fill="none" stroke="var(--bad)" opacity="0.25"/>
+                <text x={x} y={y+sz+10} textAnchor="middle" fontSize="9" fill="var(--fg-2)" fontFamily="ui-monospace">{n.id}</text>
+              </g>
+            );
+          })}
+          <circle cx={cx} cy={cy} r="14" fill="var(--accent)" opacity="0.95"/>
+          <text x={cx} y={cy+3} textAnchor="middle" fontSize="9" fill="var(--bg)" fontWeight="700" fontFamily="ui-monospace">DEST</text>
+        </svg>
+        <div className="mule-tbl">
+          <div className="mule-row mule-hd"><span>NODE</span><span>TXNS</span><span>IN/OUT</span><span>DEG</span><span>RISK</span></div>
+          {nodes.map(n=>(
+            <div key={n.id} className="mule-row">
+              <span className="mono accent">{n.id}</span>
+              <span className="mono num">{n.txns}</span>
+              <span className="mono num dim">{n.inflow}</span>
+              <span className="mono num">{n.degree}</span>
+              <span><RiskPill score={n.risk}/></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModelPerf(){
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">MODEL PERFORMANCE</span><span className="dim mono">production ensemble</span></div>
+      <div className="model-tbl">
+        <div className="model-row model-hd"><span>MODEL</span><span>AUC</span><span>RECALL</span><span>PREC</span><span>P99</span><span>STATUS</span></div>
+        {MODEL_PERF.map(m=>(
+          <div key={m.name} className="model-row">
+            <span className="mono">{m.name}</span>
+            <span className="mono num">{m.auc.toFixed(4)}</span>
+            <span className="mono num">{m.recall.toFixed(1)}%</span>
+            <span className="mono num">{m.precision.toFixed(1)}%</span>
+            <span className="mono num dim">{m.latency}ms</span>
+            <span className={`status status-${m.status}`}>{m.status.toUpperCase()}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AlertFeed({alerts, onSelect}){
+  return (
+    <div className="card">
+      <div className="card-hd"><span className="card-title">HIGH-RISK ALERT STREAM <span className="pulse-dot"/></span><span className="dim mono">{alerts.length} active</span></div>
+      <div className="alert-list">
+        {alerts.slice(0,8).map((a,i)=>(
+          <div key={i} className="alert-row" onClick={()=>onSelect && onSelect(a)}>
+            <span className={`alert-tag tag-${a.level.toLowerCase()}`}>{a.level}</span>
+            <span className="alert-msg">{a.msg}</span>
+            <span className="mono dim">{a.txn}</span>
+            <span className="mono dim">{a.time}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TxnDrawer({txn, onClose, onAction}){
+  if(!txn) return null;
+  const fmt = (n) => '₹'+n.toLocaleString('en-IN');
+  const features = [
+    {k:'Risk score', v:txn.risk, type:'score'},
+    {k:'Amount', v:fmt(txn.amount)},
+    {k:'Category', v:txn.category},
+    {k:'Payer VPA', v:txn.payer, mono:true},
+    {k:'Payee VPA', v:txn.payee, mono:true},
+    {k:'Bank (from→to)', v:`${txn.bank} → ${txn.bankTo}`},
+    {k:'App', v:txn.app},
+    {k:'City', v:txn.city},
+    {k:'Device', v:txn.device, mono:true},
+    {k:'IP address', v:txn.ip, mono:true},
+    {k:'Velocity (1h)', v:txn.velocity+' txns'},
+    {k:'New device', v:txn.newDevice?'YES':'no', tone:txn.newDevice?'bad':null},
+    {k:'New payee', v:txn.newPayee?'YES':'no', tone:txn.newPayee?'warn':null},
+  ];
+  const rules = [
+    {name:'AMOUNT_ROUND',      hit: txn.amount%1000===0,                          weight:8},
+    {name:'NEW_PAYEE_HIGH_AMT',hit: txn.newPayee && txn.amount>20000,             weight:24},
+    {name:'NEW_DEVICE',        hit: txn.newDevice,                                weight:18},
+    {name:'OFF_HOURS',         hit: txn.timestamp.getHours()<6||txn.timestamp.getHours()>23, weight:14},
+    {name:'VELOCITY>10',       hit: txn.velocity>10,                              weight:21},
+    {name:'P2P_HIGH_VAL',      hit: txn.category==='P2P' && txn.amount>30000,     weight:15},
+  ];
+  return (
+    <div className="drawer-bg" onClick={onClose}>
+      <div className="drawer" onClick={e=>e.stopPropagation()}>
+        <div className="drawer-hd">
+          <div>
+            <div className="dr-id mono accent">{txn.id}</div>
+            <div className="dr-time mono dim">{txn.timestamp.toString().slice(0,24)}</div>
+          </div>
+          <button className="x-btn" onClick={onClose}>✕</button>
+        </div>
+        <div className="drawer-banner">
+          <RiskPill score={txn.risk}/>
+          <span className="dr-amt mono">{fmt(txn.amount)}</span>
+          <CatPill cat={txn.category}/>
+          <FlagPill flag={txn.flag}/>
+        </div>
+        <div className="drawer-section">
+          <div className="dr-hd">FEATURES</div>
+          <div className="dr-features">
+            {features.map(f=>(
+              <div key={f.k} className="dr-feat">
+                <span className="dr-k">{f.k}</span>
+                <span className={`dr-v ${f.mono?'mono':''} ${f.tone?f.tone+'-fg':''}`}>{f.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="drawer-section">
+          <div className="dr-hd">RULE EXPLANATION</div>
+          <div className="dr-rules">
+            {rules.map(r=>(
+              <div key={r.name} className={'dr-rule '+(r.hit?'hit':'miss')}>
+                <span className="mono">{r.hit?'●':'○'}</span>
+                <span className="mono">{r.name}</span>
+                <span className="mono num dim">+{r.weight}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="drawer-actions">
+          <button className="btn bad"   onClick={()=>onAction('block',txn)}>BLOCK</button>
+          <button className="btn warn"  onClick={()=>onAction('review',txn)}>SEND TO REVIEW</button>
+          <button className="btn ok"    onClick={()=>onAction('clear',txn)}>CLEAR</button>
+          <button className="btn ghost" onClick={()=>onAction('escalate',txn)}>ESCALATE</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window,{
+  Spark, KpiCard, RiskPill, CatPill, FlagPill,
+  LiveFeed, RiskDistribution, VelocityCard,
+  BankBreakdown, CategoryMix, GeoAnomaly,
+  AttackPatterns, MuleNetwork, ModelPerf, AlertFeed, TxnDrawer
+});
+  </script>
+
+  <!-- ── App ── -->
+  <script type="text/babel">
+const TWEAK_DEFAULTS = {
+  "theme": "dark",
+  "density": "comfortable",
+  "accent": "#4cc4d7",
+  "layout": "grid",
+  "animSpeed": 2,
+  "showKpis": true,
+  "showFeed": true,
+  "showRiskDist": true,
+  "showVelocity": true,
+  "showBanks": true,
+  "showCategory": true,
+  "showGeo": true,
+  "showPatterns": true,
+  "showMule": true,
+  "showModel": true,
+  "showAlerts": true
+};
+
+const Icon = ({name}) => {
+  const map = {
+    overview: <path d="M3 3h6v6H3zM11 3h6v3h-6zM11 8h6v6h-6zM3 11h6v3H3z" stroke="currentColor" strokeWidth="1" fill="none"/>,
+    feed:     <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1"/>,
+    risk:     <path d="M8 2L2 13h12z" stroke="currentColor" strokeWidth="1" fill="none"/>,
+    mule:     <g><circle cx="4" cy="4" r="2" stroke="currentColor" fill="none"/><circle cx="12" cy="4" r="2" stroke="currentColor" fill="none"/><circle cx="8" cy="12" r="2" stroke="currentColor" fill="none"/><path d="M5 5l3 6M11 5l-3 6" stroke="currentColor"/></g>,
+    alerts:   <path d="M8 2c-2 0-4 2-4 4v3l-1 2h10l-1-2V6c0-2-2-4-4-4zM6 13c0 1 1 2 2 2s2-1 2-2" stroke="currentColor" strokeWidth="1" fill="none"/>,
+    model:    <g><circle cx="4" cy="8" r="1.5" stroke="currentColor" fill="none"/><circle cx="12" cy="4" r="1.5" stroke="currentColor" fill="none"/><circle cx="12" cy="12" r="1.5" stroke="currentColor" fill="none"/><path d="M5 8l6-3M5 8l6 3" stroke="currentColor"/></g>,
+    geo:      <g><circle cx="8" cy="8" r="6" stroke="currentColor" fill="none"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" stroke="currentColor" fill="none"/></g>,
+    bank:     <g><path d="M2 7h12L8 2zM3 8v5M6 8v5M10 8v5M13 8v5M2 13h12" stroke="currentColor" fill="none"/></g>,
+    cog:      <circle cx="8" cy="8" r="3" stroke="currentColor" fill="none"/>,
+    user:     <g><circle cx="8" cy="6" r="2.5" stroke="currentColor" fill="none"/><path d="M3 14c1-3 3-4 5-4s4 1 5 4" stroke="currentColor" fill="none"/></g>,
+  };
+  return <svg width="14" height="14" viewBox="0 0 16 16">{map[name]}</svg>;
+};
+
+const NAV = [
+  {grp:'OPS', items:[
+    {id:'overview', label:'Overview',    icon:'overview'},
+    {id:'feed',     label:'Live Feed',   icon:'feed',    badge:'LIVE', tone:'bad'},
+    {id:'alerts',   label:'Alerts',      icon:'alerts',  badge:'47',   tone:'bad'},
+  ]},
+  {grp:'INTELLIGENCE', items:[
+    {id:'risk',     label:'Risk Models', icon:'model'},
+    {id:'mule',     label:'Mule Network',icon:'mule',    badge:'147'},
+    {id:'patterns', label:'Attack Patterns', icon:'risk'},
+    {id:'geo',      label:'Geographic',  icon:'geo',     badge:'+332%', tone:'warn'},
+    {id:'banks',    label:'Bank Analytics', icon:'bank'},
+  ]},
+  {grp:'SYSTEM', items:[
+    {id:'analyst',  label:'Analysts',    icon:'user'},
+    {id:'settings', label:'Settings',    icon:'cog'},
+  ]},
+];
+
+function Sidebar({active, setActive}){
+  return (
+    <aside className="sidebar">
+      {NAV.map(g => (
+        <React.Fragment key={g.grp}>
+          <div className="nav-grp">{g.grp}</div>
+          {g.items.map(it => (
+            <div key={it.id} className={'nav-item'+(active===it.id?' active':'')} onClick={()=>setActive(it.id)}>
+              <span className="nav-icon"><Icon name={it.icon}/></span>
+              <span>{it.label}</span>
+              {it.badge && <span className={'nav-badge '+(it.tone||'')}>{it.badge}</span>}
+            </div>
+          ))}
+        </React.Fragment>
+      ))}
+      <div className="sidebar-foot">
+        <div className="stat"><span>INGEST</span><span className="ok-fg">● HEALTHY</span></div>
+        <div className="stat"><span>P99</span><span>42ms</span></div>
+        <div className="stat"><span>VERSION</span><span>v4.2.1</span></div>
+      </div>
+    </aside>
+  );
+}
+
+function Topbar({time}){
+  return (
+    <header className="topbar">
+      <div className="brand">
+        <div className="logo"/>
+        UPI<small>RISK ANALYTICS</small>
+      </div>
+      <div className="topbar-search">
+        <span>⌕</span>
+        <input placeholder="Search UPI ID, VPA, device, IP, payee..."/>
+        <kbd>⌘K</kbd>
+      </div>
+      <div className="topbar-spacer"/>
+      <div className="topbar-meta">
+        <span className="live">STREAMING</span>
+        <span>NPCI · prod-mum</span>
+        <span>{time}</span>
+        <span className="mono">analyst@risk-ops</span>
+      </div>
+    </header>
+  );
+}
+
+const SPARKS = {
+  tpv:      [82,84,81,86,88,92,94,96,93,98,102,104],
+  blocked:  [4,6,5,8,7,11,9,14,12,16,18,21],
+  velocity: [3,3,5,8,14,21],
+  recall:   [93.8,93.9,94.0,94.1,94.0,94.1],
+  fpr:      [2.1,2.0,1.9,1.8,1.9,1.8],
+  p99:      [50,48,46,44,43,42],
+  mules:    [120,124,128,132,138,144,147],
+  analyst:  [101,98,95,92,90,89],
+};
+
+function OverviewPage({tweaks, feed, alerts, onSelectTxn, filter, setFilter, paused, setPaused}){
+  const layout = tweaks.layout || 'grid';
+  const dense  = tweaks.density === 'compact';
+
+  if(layout === 'command'){
+    return (
+      <>
+        <div className="page-hd">
+          <h1>Command Center</h1><span className="crumbs">/ ops / overview</span>
+          <div className="actions">
+            <button className="btn-sm">Export</button>
+            <button className="btn-sm primary">Sound alarms</button>
+          </div>
+        </div>
+        {tweaks.showKpis && <div className="row r4">{KPIS.slice(0,4).map(k=><KpiCard key={k.key} k={k} sparkData={SPARKS[k.key]} dense={dense}/>)}</div>}
+        <div className="row r-32">
+          {tweaks.showFeed && <LiveFeed feed={feed} filter={filter} setFilter={setFilter} onSelect={onSelectTxn} animSpeed={tweaks.animSpeed} dense={dense} paused={paused} setPaused={setPaused}/>}
+          <div className="row" style={{gridTemplateRows:'auto auto', gap:10}}>
+            {tweaks.showVelocity && <VelocityCard/>}
+            {tweaks.showAlerts && <AlertFeed alerts={alerts}/>}
+          </div>
+        </div>
+        <div className="row r3">
+          {tweaks.showPatterns && <AttackPatterns/>}
+          {tweaks.showGeo && <GeoAnomaly/>}
+          {tweaks.showRiskDist && <RiskDistribution/>}
+        </div>
+        <div className="row r2">
+          {tweaks.showMule && <MuleNetwork/>}
+          {tweaks.showCategory && <CategoryMix/>}
+        </div>
+        {tweaks.showBanks && <div className="row r-12"><BankBreakdown/>{tweaks.showModel && <ModelPerf/>}</div>}
+      </>
+    );
+  }
+
+  if(layout === 'trader'){
+    return (
+      <>
+        <div className="page-hd"><h1>Trader View</h1><span className="crumbs">/ ops / overview · max density</span></div>
+        {tweaks.showKpis && <div className="row r8">{KPIS.map(k=><KpiCard key={k.key} k={k} sparkData={SPARKS[k.key]} dense={true}/>)}</div>}
+        <div className="row r2">
+          {tweaks.showFeed && <LiveFeed feed={feed} filter={filter} setFilter={setFilter} onSelect={onSelectTxn} animSpeed={tweaks.animSpeed} dense={true} paused={paused} setPaused={setPaused}/>}
+          <div className="row" style={{gridTemplateRows:'1fr 1fr', gap:10}}>
+            {tweaks.showAlerts && <AlertFeed alerts={alerts}/>}
+            {tweaks.showVelocity && <VelocityCard/>}
+          </div>
+        </div>
+        <div className="row r4">
+          {tweaks.showRiskDist && <RiskDistribution/>}
+          {tweaks.showPatterns && <AttackPatterns/>}
+          {tweaks.showGeo && <GeoAnomaly/>}
+          {tweaks.showCategory && <CategoryMix/>}
+        </div>
+        <div className="row r2">
+          {tweaks.showMule && <MuleNetwork/>}
+          {tweaks.showBanks && <BankBreakdown/>}
+        </div>
+        {tweaks.showModel && <ModelPerf/>}
+      </>
+    );
+  }
+
+  // Default: grid
+  return (
+    <>
+      <div className="page-hd">
+        <h1>Overview</h1><span className="crumbs">/ ops / overview</span>
+        <div className="actions">
+          <button className="btn-sm">24h</button>
+          <button className="btn-sm">7d</button>
+          <button className="btn-sm">Export</button>
+        </div>
+      </div>
+      {tweaks.showKpis && <div className="row r4">{KPIS.slice(0,4).map(k=><KpiCard key={k.key} k={k} sparkData={SPARKS[k.key]} dense={dense}/>)}</div>}
+      <div className="row r4">{KPIS.slice(4).map(k=><KpiCard key={k.key} k={k} sparkData={SPARKS[k.key]} dense={dense}/>)}</div>
+      {tweaks.showFeed && <LiveFeed feed={feed} filter={filter} setFilter={setFilter} onSelect={onSelectTxn} animSpeed={tweaks.animSpeed} dense={dense} paused={paused} setPaused={setPaused}/>}
+      <div className="row r3">
+        {tweaks.showVelocity && <VelocityCard/>}
+        {tweaks.showRiskDist && <RiskDistribution/>}
+        {tweaks.showPatterns && <AttackPatterns/>}
+      </div>
+      <div className="row r-21">
+        {tweaks.showBanks && <BankBreakdown/>}
+        {tweaks.showCategory && <CategoryMix/>}
+      </div>
+      <div className="row r-12">
+        {tweaks.showGeo && <GeoAnomaly/>}
+        {tweaks.showMule && <MuleNetwork/>}
+      </div>
+      <div className="row r2">
+        {tweaks.showModel && <ModelPerf/>}
+        {tweaks.showAlerts && <AlertFeed alerts={alerts}/>}
+      </div>
+    </>
+  );
+}
+
+function AppTweaks({t, setTweak}){
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Theme"/>
+      <TweakRadio label="Mode" value={t.theme} options={['dark','light']} onChange={v=>setTweak('theme',v)}/>
+      <TweakColor label="Accent" value={t.accent} onChange={v=>setTweak('accent',v)}/>
+      <TweakSection label="Layout"/>
+      <TweakSelect label="Variation" value={t.layout} options={[
+        {value:'grid',label:'Grid (balanced)'},
+        {value:'command',label:'Command center'},
+        {value:'trader',label:'Trader view (max density)'}]} onChange={v=>setTweak('layout',v)}/>
+      <TweakRadio label="Density" value={t.density} options={['compact','comfortable']} onChange={v=>setTweak('density',v)}/>
+      <TweakSection label="Live data"/>
+      <TweakSlider label="Stream speed" value={t.animSpeed} min={0} max={6} step={1} unit="/s" onChange={v=>setTweak('animSpeed',v)}/>
+      <TweakSection label="Modules"/>
+      <TweakToggle label="KPI cards"         value={t.showKpis}     onChange={v=>setTweak('showKpis',v)}/>
+      <TweakToggle label="Live feed"         value={t.showFeed}     onChange={v=>setTweak('showFeed',v)}/>
+      <TweakToggle label="Risk distribution" value={t.showRiskDist} onChange={v=>setTweak('showRiskDist',v)}/>
+      <TweakToggle label="Velocity"          value={t.showVelocity} onChange={v=>setTweak('showVelocity',v)}/>
+      <TweakToggle label="Bank breakdown"    value={t.showBanks}    onChange={v=>setTweak('showBanks',v)}/>
+      <TweakToggle label="Category mix"      value={t.showCategory} onChange={v=>setTweak('showCategory',v)}/>
+      <TweakToggle label="Geographic"        value={t.showGeo}      onChange={v=>setTweak('showGeo',v)}/>
+      <TweakToggle label="Attack patterns"   value={t.showPatterns} onChange={v=>setTweak('showPatterns',v)}/>
+      <TweakToggle label="Mule network"      value={t.showMule}     onChange={v=>setTweak('showMule',v)}/>
+      <TweakToggle label="Model performance" value={t.showModel}    onChange={v=>setTweak('showModel',v)}/>
+      <TweakToggle label="Alert feed"        value={t.showAlerts}   onChange={v=>setTweak('showAlerts',v)}/>
+    </TweaksPanel>
+  );
+}
+
+function App(){
+  const [t, setTweak]     = useTweaks(TWEAK_DEFAULTS);
+  const [active, setActive] = useState('overview');
+  const [feed, setFeed]   = useState(()=>genFeed(60));
+  const [alerts, setAlerts] = useState(ALERTS_SEED);
+  const [selected, setSelected] = useState(null);
+  const [filter, setFilter] = useState({kind:'all', bank:null});
+  const [paused, setPaused] = useState(false);
+  const [time, setTime]   = useState(()=>new Date().toTimeString().slice(0,8)+' IST');
+
+  useEffect(()=>{
+    const i = setInterval(()=>setTime(new Date().toTimeString().slice(0,8)+' IST'), 1000);
+    return ()=>clearInterval(i);
+  },[]);
+
+  useEffect(()=>{
+    if(paused || t.animSpeed===0) return;
+    const interval = 1000 / t.animSpeed;
+    const i = setInterval(()=>{
+      const tx = genTxn();
+      setFeed(f => [tx, ...f].slice(0,80));
+      if(tx.flag==='BLOCK' && Math.random()<0.5){
+        setAlerts(a => [{
+          level: tx.risk>=85?'CRIT':'WARN',
+          msg: `${tx.category} ${('₹'+tx.amount.toLocaleString('en-IN'))} · risk ${tx.risk} · ${tx.city}`,
+          time: tx.timestamp.toTimeString().slice(0,8),
+          txn: tx.id,
+        }, ...a].slice(0,12));
+      }
+    }, interval);
+    return ()=>clearInterval(i);
+  },[t.animSpeed, paused]);
+
+  useEffect(()=>{
+    document.documentElement.setAttribute('data-theme', t.theme);
+    document.documentElement.style.setProperty('--accent', t.accent);
+    document.documentElement.style.setProperty('--accent-soft', t.accent+'24');
+  },[t.theme, t.accent]);
+
+  const onAction = (act, txn) => {
+    setAlerts(a => [{
+      level: act==='block'?'CRIT':act==='review'?'WARN':'INFO',
+      msg: `Analyst action: ${act.toUpperCase()} on ${txn.id}`,
+      time: new Date().toTimeString().slice(0,8),
+      txn: txn.id,
+    }, ...a].slice(0,12));
+    setSelected(null);
+  };
+
+  const Page = (()=>{
+    switch(active){
+      case 'overview': return <OverviewPage tweaks={t} feed={feed} alerts={alerts} onSelectTxn={setSelected} filter={filter} setFilter={setFilter} paused={paused} setPaused={setPaused}/>;
+      case 'feed':     return (<><div className="page-hd"><h1>Live Transaction Feed</h1><span className="crumbs">/ ops / feed</span></div><LiveFeed feed={feed} filter={filter} setFilter={setFilter} onSelect={setSelected} animSpeed={t.animSpeed} dense={false} paused={paused} setPaused={setPaused}/><div className="row r3"><RiskDistribution/><VelocityCard/><AttackPatterns/></div></>);
+      case 'risk':     return (<><div className="page-hd"><h1>Risk Models</h1><span className="crumbs">/ intel / models</span></div><ModelPerf/><div className="row r2"><RiskDistribution/><AttackPatterns/></div></>);
+      case 'mule':     return (<><div className="page-hd"><h1>Mule Network</h1><span className="crumbs">/ intel / mule</span></div><MuleNetwork/><div className="row r2"><AttackPatterns/><GeoAnomaly/></div></>);
+      case 'geo':      return (<><div className="page-hd"><h1>Geographic Anomalies</h1><span className="crumbs">/ intel / geo</span></div><div className="row r2"><GeoAnomaly/><MuleNetwork/></div></>);
+      case 'banks':    return (<><div className="page-hd"><h1>Bank Analytics</h1><span className="crumbs">/ intel / banks</span></div><BankBreakdown/><div className="row r2"><CategoryMix/><RiskDistribution/></div></>);
+      case 'alerts':   return (<><div className="page-hd"><h1>Alert Stream</h1><span className="crumbs">/ ops / alerts</span></div><AlertFeed alerts={alerts}/><div className="row r2"><AttackPatterns/><VelocityCard/></div></>);
+      case 'patterns': return (<><div className="page-hd"><h1>Attack Patterns</h1><span className="crumbs">/ intel / patterns</span></div><AttackPatterns/><div className="row r2"><MuleNetwork/><GeoAnomaly/></div></>);
+      case 'analyst':  return (<><div className="page-hd"><h1>Analyst Performance</h1><span className="crumbs">/ system / analysts</span></div><AlertFeed alerts={alerts}/></>);
+      default:         return (<><div className="page-hd"><h1>Settings</h1><span className="crumbs">/ system / settings</span></div><div className="card"><span className="dim">Use the Tweaks panel (bottom-right).</span></div></>);
+    }
+  })();
+
+  return (
+    <div className={'app layout-'+t.layout+(t.density==='compact'?' dense':'')}>
+      <Topbar time={time}/>
+      <Sidebar active={active} setActive={setActive}/>
+      <main className="main">{Page}</main>
+      {selected && <TxnDrawer txn={selected} onClose={()=>setSelected(null)} onAction={onAction}/>}
+      <AppTweaks t={t} setTweak={setTweak}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
