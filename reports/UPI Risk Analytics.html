@@ -168,7 +168,7 @@ button{ font-family: inherit; font-size: inherit; cursor:pointer; border:0; back
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 2px;
 }
-.nav-grp{
+.nav-grp{     
   font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
   color: var(--fg-3); text-transform: uppercase;
   padding: 12px 14px 4px;
@@ -638,14 +638,19 @@ button{ font-family: inherit; font-size: inherit; cursor:pointer; border:0; back
   display: flex; justify-content: flex-end;
 }
 .drawer{
-  width: 460px; height: 100%;
+  width: 480px; height: 100%;
   background: var(--bg-1);
   border-left: 0.5px solid var(--border-strong);
-  padding: 16px 18px;
+  padding: 16px 18px 24px;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex; flex-direction: column; gap: 14px;
   animation: slideIn 0.18s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
+.drawer::-webkit-scrollbar{ width: 4px; }
+.drawer::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.1); border-radius: 2px; }
 @keyframes slideIn { from{ transform: translateX(100%); } to{ transform: translateX(0); } }
 .drawer-hd{ display: flex; justify-content: space-between; align-items: flex-start; }
 .dr-id{ font-size: 16px; font-weight: 600; }
@@ -715,6 +720,223 @@ button{ font-family: inherit; font-size: inherit; cursor:pointer; border:0; back
 .layout-trader .card{ padding: 6px 8px; }
 .layout-trader .card-hd{ margin-bottom: 4px; }
 .layout-trader{ font-size: 11px; }
+
+/* ─── Settings Page ─── */
+.stg-root{
+  margin: -12px;
+  display: flex; flex-direction: column;
+  height: calc(100vh - 44px);
+  overflow: hidden;
+}
+/* page header */
+.stg-hd{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 44px;
+  background: var(--bg-1); border-bottom: 0.5px solid var(--border); flex-shrink: 0;
+}
+.stg-hd-left{ display: flex; align-items: center; gap: 4px; }
+.stg-hd-title{ font-size: 15px; font-weight: 600; color: var(--fg); }
+.stg-hd-crumb{ font-size: 13px; color: var(--fg-2); }
+.stg-sep{ color: var(--fg-3); margin: 0 3px; font-size: 13px; }
+.stg-hd-actions{ display: flex; align-items: center; gap: 8px; }
+.stg-unsaved{
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace;
+}
+.stg-unsaved::before{
+  content:''; width:6px; height:6px; border-radius:50%; background:var(--accent);
+}
+.stg-btn-reset{
+  height: 26px; padding: 0 12px; font-size: 11px; font-weight: 500; font-family: inherit;
+  border: 0.5px solid var(--border-strong); border-radius: 4px;
+  background: var(--bg-1); color: var(--fg-1); cursor: pointer;
+}
+.stg-btn-reset:hover{ background: var(--bg-2); }
+.stg-btn-save{
+  height: 26px; padding: 0 14px; font-size: 11px; font-weight: 600; font-family: inherit;
+  border: none; border-radius: 4px; background: var(--accent); color: #001318; cursor: pointer;
+}
+.stg-btn-save:hover{ filter: brightness(1.08); }
+/* tabs */
+.stg-tabs{
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-1); flex-shrink: 0;
+}
+.stg-tab{
+  padding: 10px 16px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--fg-3); border-right: 0.5px solid var(--border);
+  cursor: pointer; transition: color 0.15s;
+}
+.stg-tab:last-child{ border-right: none; }
+.stg-tab:hover{ color: var(--fg-2); }
+.stg-tab.active{ color: var(--fg); }
+/* body */
+.stg-body{ display: grid; grid-template-columns: 240px 1fr; flex: 1; overflow: hidden; }
+.stg-nav{
+  background: var(--bg-1); border-right: 0.5px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; padding: 8px 0;
+}
+.stg-nav-label{
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--fg-3); text-transform: uppercase; padding: 12px 14px 4px;
+}
+.stg-nav-item{
+  padding: 8px 14px; cursor: pointer;
+  border-left: 2px solid transparent; transition: background 0.12s;
+}
+.stg-nav-item:hover{ background: var(--bg-2); }
+.stg-nav-item.active{ border-left-color: var(--accent); background: var(--bg-2); }
+.stg-nav-name{ font-size: 12px; font-weight: 500; color: var(--fg-1); margin-bottom: 1px; }
+.stg-nav-item.active .stg-nav-name{ color: var(--fg); }
+.stg-nav-sub{ font-size: 10px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; }
+.stg-nav-foot{
+  margin-top: auto; padding: 12px 14px;
+  font-size: 10px; color: var(--fg-3);
+  border-top: 0.5px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+}
+.stg-main{ overflow-y: auto; padding: 20px 24px; }
+.stg-section-badge{ font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--fg-3); margin-bottom: 8px; }
+.stg-section-title{ font-size: 20px; font-weight: 600; color: var(--fg); margin-bottom: 3px; }
+.stg-section-sub{ font-size: 12px; color: var(--accent); margin-bottom: 20px; }
+/* cards */
+.stg-card{ background: var(--bg-1); border: 0.5px solid var(--border); border-radius: 6px; margin-bottom: 14px; overflow: hidden; }
+.stg-card-hd{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 0.5px solid var(--border);
+}
+.stg-card-label{ font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--fg-3); }
+.stg-card-badge{ font-size: 9px; font-weight: 600; letter-spacing: 0.08em; color: var(--fg-3); }
+/* rows */
+.stg-row{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px; border-bottom: 0.5px solid var(--border); flex-wrap: wrap;
+}
+.stg-row:last-child{ border-bottom: none; }
+.stg-row-info{ flex: 1; min-width: 160px; }
+.stg-row-name{ font-size: 13px; font-weight: 500; color: var(--fg); margin-bottom: 3px; }
+.stg-row-desc{ font-size: 11px; color: var(--fg-3); }
+.stg-accent-note{ font-size: 10px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+/* toggle */
+.stg-toggle-group{
+  display: flex; background: var(--bg-2);
+  border: 0.5px solid var(--border-strong); border-radius: 4px; overflow: hidden; flex-shrink: 0;
+}
+.stg-toggle-btn{
+  padding: 5px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--fg-3); background: transparent; border: none; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.stg-toggle-btn.active{ background: var(--bg-3); color: var(--fg); }
+/* swatches */
+.stg-swatches{ display: flex; align-items: center; gap: 5px; flex-wrap: wrap; flex-shrink: 0; }
+.stg-swatch{
+  width: 24px; height: 24px; border-radius: 4px; cursor: pointer;
+  border: 2px solid transparent; transition: transform 0.12s, border-color 0.12s;
+}
+.stg-swatch:hover{ transform: scale(1.12); }
+.stg-swatch.selected{ border-color: var(--fg); box-shadow: 0 0 0 1px rgba(255,255,255,0.2); }
+.stg-swatch-custom{ width: 56px; height: 24px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border-strong); }
+/* misc controls */
+.stg-readonly{ font-size: 11px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+.stg-switch{
+  position: relative; width: 32px; height: 18px; border: none; border-radius: 999px;
+  background: var(--fg-3); cursor: pointer; padding: 0; transition: background 0.15s; flex-shrink: 0;
+}
+.stg-switch[data-on="1"]{ background: var(--accent); }
+.stg-switch i{
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform 0.15s; display: block;
+}
+.stg-switch[data-on="1"] i{ transform: translateX(14px); }
+.stg-select{
+  height: 26px; padding: 0 8px;
+  border: 0.5px solid var(--border-strong); border-radius: 4px;
+  background: var(--bg-2); color: var(--fg); font-family: inherit; font-size: 11px;
+  outline: none; cursor: pointer; min-width: 160px;
+}
+.stg-input{
+  height: 26px; padding: 0 8px;
+  border: 0.5px solid var(--border-strong); border-radius: 4px;
+  background: var(--bg-2); color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  outline: none; width: 160px;
+}
+.stg-input:focus{ border-color: var(--accent); }
+.stg-num-input{
+  height: 26px; padding: 0 8px; text-align: right; width: 72px;
+  border: 0.5px solid var(--border-strong); border-radius: 4px;
+  background: var(--bg-2); color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  outline: none;
+}
+.stg-num-input:focus{ border-color: var(--accent); }
+/* table rows */
+.stg-tbl-hd{
+  display: grid; gap: 8px; padding: 6px 14px;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.08em; color: var(--fg-3);
+  border-bottom: 0.5px solid var(--border-strong); background: var(--bg-2);
+}
+.stg-tbl-row{
+  display: grid; gap: 8px; padding: 10px 14px;
+  font-size: 11px; border-bottom: 0.5px solid var(--border); align-items: center;
+}
+.stg-tbl-row:last-child{ border-bottom: none; }
+.stg-tbl-integrations{ grid-template-columns: 1.6fr 1fr 1fr auto; }
+.stg-tbl-members{ grid-template-columns: 1fr 1.5fr 0.8fr 0.8fr; }
+.stg-tbl-audit{ grid-template-columns: 0.8fr 0.8fr 1.4fr 1fr; }
+.stg-tbl-foot{
+  display: flex; justify-content: flex-end;
+  padding: 10px 14px; border-top: 0.5px solid var(--border);
+}
+.stg-card-actions{
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 14px; border-top: 0.5px solid var(--border);
+}
+/* badges */
+.stg-status{
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; height: 18px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: 0.04em;
+}
+.stg-status.ok{ background: var(--ok-soft); color: var(--ok); }
+.stg-status.bad{ background: var(--bg-3); color: var(--fg-2); }
+.stg-role-badge{
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; height: 18px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+}
+.role-admin{ background: var(--bad-soft); color: var(--bad); }
+.role-analyst{ background: var(--accent-soft); color: var(--accent); }
+.role-viewer{ background: var(--bg-3); color: var(--fg-2); }
+.stg-action-badge{
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; height: 18px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+}
+.action-bad{ background: var(--bad-soft); color: var(--bad); }
+.action-warn{ background: var(--warn-soft); color: var(--warn); }
+.action-ok{ background: var(--ok-soft); color: var(--ok); }
+.action-accent{ background: var(--accent-soft); color: var(--accent); }
+/* buttons */
+.stg-btn-primary{
+  height: 26px; padding: 0 14px; font-size: 11px; font-weight: 600; font-family: inherit;
+  border: none; border-radius: 4px; background: var(--accent); color: #001318; cursor: pointer;
+}
+.stg-btn-primary:hover{ filter: brightness(1.08); }
+.stg-btn-outline{
+  height: 26px; padding: 0 12px; font-size: 11px; font-weight: 500; font-family: inherit;
+  border: 0.5px solid var(--border-strong); border-radius: 4px;
+  background: transparent; color: var(--fg-1); cursor: pointer;
+}
+.stg-btn-outline:hover{ background: var(--bg-2); }
+/* warning banner */
+.stg-warning-banner{
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 12px 16px; margin-bottom: 14px;
+  background: var(--warn-soft); border: 0.5px solid var(--warn); border-radius: 6px;
+  font-size: 12px; color: var(--fg);
+}
+.stg-warning-title{ font-weight: 600; color: var(--warn); white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -1458,6 +1680,199 @@ function AlertFeed({alerts, onSelect}){
   );
 }
 
+function TxnChatbot({txn}){
+  const [messages, setMessages] = useState([]);
+  const [input, setInput]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const endRef = useRef(null);
+
+  const ts = () => new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+
+  useEffect(()=>{
+    setMessages([{
+      role:'ai',
+      text:`Hi! I'm your **AI Investigator** powered by Claude.\nTransaction **${txn.id}** has a risk score of **${txn.risk}/100** (${txn.risk>=70?'🔴 HIGH':txn.risk>=40?'🟡 MEDIUM':'🟢 LOW'}).\n\nHow can I help you analyse it?`,
+      time: ts(),
+    }]);
+    setInput('');
+  },[txn.id]);
+
+  useEffect(()=>{ endRef.current?.scrollIntoView({behavior:'smooth'}); },[messages,loading]);
+
+  const QUICK = [
+    {label:'🔍 Why flagged?',     msg:`Why was transaction ${txn.id} flagged? Explain in detail.`},
+    {label:'📊 Explain score',    msg:`Explain the risk score of ${txn.risk}/100 for ${txn.id}`},
+    {label:'🚦 What action?',     msg:`What action should I take for ${txn.id}?`},
+  ];
+
+  // Simple inline markdown → HTML
+  const md = t => t
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code class="wa-code">$1</code>')
+    .replace(/^• (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]+<\/li>)/g,m=>`<ul class="wa-ul">${m}</ul>`)
+    .replace(/\n/g,'<br/>');
+
+  // Local fallback when backend is offline
+  const localReply = (q) => {
+    const lo = q.toLowerCase();
+    if(lo.includes('why')||lo.includes('flag')||lo.includes('explain')||lo.includes('score')){
+      const rules=[];
+      if(txn.newDevice) rules.push('🔴 **NEW_DEVICE** (+18) — Unrecognised device footprint');
+      if(txn.velocity>10) rules.push(`🔴 **VELOCITY>10** (+21) — ${txn.velocity} txns/hr exceeds limit`);
+      if(txn.newPayee&&txn.amount>20000) rules.push(`🟡 **NEW_PAYEE_HIGH_AMT** (+24) — ₹${txn.amount.toLocaleString('en-IN')} to first-time payee`);
+      if(txn.amount%1000===0) rules.push('🟡 **AMOUNT_ROUND** (+8) — Structuring pattern detected');
+      if(!rules.length) rules.push('🔵 **ML_ANOMALY** — Subtle deviation from behavioural baseline');
+      return `**Risk Score: ${txn.risk}/100**\n\nTriggered rules for **${txn.id}**:\n${rules.map(r=>'• '+r).join('\n')}\n\n_Recommended: ${txn.risk>=70?'BLOCK or Step-up Auth':'Send to Review'}_`;
+    }
+    if(lo.includes('action')||lo.includes('recommend')||lo.includes('block')||lo.includes('clear')){
+      if(txn.risk>=80) return `Score **${txn.risk}/100** → 🔴 **BLOCK**\n\nImmediately block and notify the account holder. High-confidence fraud signal with multiple red flags.`;
+      if(txn.risk>=50) return `Score **${txn.risk}/100** → 🟡 **SEND TO REVIEW**\n\nEscalate to senior analyst. Additional authentication or manual check advised.`;
+      return `Score **${txn.risk}/100** → 🟢 **CLEAR**\n\nTransaction appears legitimate. Risk is within acceptable threshold.`;
+    }
+    return `I can analyse **${txn.id}** in detail. Try:\n• _"Why was this flagged?"_\n• _"What action should I take?"_\n• _"Explain the risk score"_`;
+  };
+
+  const sendMsg = async (text) => {
+    const msg = (text||input).trim();
+    if(!msg||loading) return;
+    setInput('');
+    setMessages(prev=>[...prev,{role:'user',text:msg,time:ts()}]);
+    setLoading(true);
+    try{
+      const res = await fetch('http://localhost:8000/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({message:msg, transaction_id:txn.id}),
+        signal: AbortSignal.timeout(25000),
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      setMessages(prev=>[...prev,{role:'ai',text:data.answer||(data.reply||'(No response)'),time:ts()}]);
+    } catch(_){
+      setMessages(prev=>[...prev,{role:'ai',text:localReply(msg),time:ts()}]);
+    } finally { setLoading(false); }
+  };
+
+  /* ── inline styles (immune to CSS cascade) ── */
+  const S = {
+    wrap:  { display:'flex', flexDirection:'column', borderRadius:'8px', overflow:'hidden',
+              background:'#0b141a', flexShrink:0 },
+    hd:    { display:'flex', alignItems:'center', gap:'10px', padding:'10px 13px',
+              background:'#202c33', flexShrink:0 },
+    hdAv:  { width:36, height:36, borderRadius:'50%', flexShrink:0,
+              background:'linear-gradient(135deg,#00a884,#128c7e)',
+              display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' },
+    hdName:{ fontSize:13, fontWeight:600, color:'#e9edef', fontFamily:'Geist,sans-serif' },
+    hdSub: { display:'flex', alignItems:'center', gap:5, fontSize:10, color:'#8696a0', marginTop:1 },
+    dot:   { width:7, height:7, borderRadius:'50%', background:'#00a884', boxShadow:'0 0 4px #00a884', display:'inline-block' },
+    msgs:  { height:260, overflowY:'auto', padding:'10px 12px',
+              display:'flex', flexDirection:'column', gap:6, scrollBehavior:'smooth' },
+    rowAi: { display:'flex', justifyContent:'flex-start', marginBottom:2 },
+    rowUs: { display:'flex', justifyContent:'flex-end', marginBottom:2 },
+    bubAi: { maxWidth:'85%', padding:'7px 10px 3px', borderRadius:'8px 8px 8px 2px',
+              background:'#202c33', color:'#e9edef', fontSize:12, lineHeight:1.55,
+              fontFamily:'Geist,sans-serif', wordBreak:'break-word', position:'relative' },
+    bubUs: { maxWidth:'85%', padding:'7px 10px 3px', borderRadius:'8px 8px 2px 8px',
+              background:'#005c4b', color:'#e9edef', fontSize:12, lineHeight:1.55,
+              fontFamily:'Geist,sans-serif', wordBreak:'break-word', position:'relative' },
+    foot:  { display:'flex', alignItems:'center', justifyContent:'flex-end', gap:4, marginTop:3 },
+    ts:    { fontSize:10, color:'#8696a0' },
+    ticks: { fontSize:11, color:'#53bdeb', letterSpacing:-1 },
+    dots:  { display:'flex', gap:4, padding:'3px 2px' },
+    chips: { display:'flex', flexWrap:'wrap', gap:5, padding:'7px 12px',
+              borderTop:'1px solid rgba(255,255,255,.06)', flexShrink:0 },
+    chip:  { background:'#1a2530', border:'1px solid rgba(0,168,132,.28)', color:'#00a884',
+              borderRadius:16, padding:'4px 11px', fontSize:10, cursor:'pointer',
+              fontFamily:'Geist,sans-serif', whiteSpace:'nowrap' },
+    inRow: { display:'flex', alignItems:'center', gap:8, padding:'8px 12px',
+              background:'#202c33', borderRadius:'0 0 8px 8px', flexShrink:0 },
+    inBox: { flex:1, background:'#2a3942', border:'none', borderRadius:20,
+              padding:'8px 14px', fontSize:12, color:'#e9edef',
+              fontFamily:'Geist,sans-serif', outline:'none' },
+    btn:   { width:36, height:36, borderRadius:'50%', background:'#00a884', border:'none',
+              color:'#fff', cursor:'pointer', display:'flex', alignItems:'center',
+              justifyContent:'center', flexShrink:0 },
+    btnDis:{ width:36, height:36, borderRadius:'50%', background:'#3c4d52', border:'none',
+              color:'#fff', cursor:'not-allowed', display:'flex', alignItems:'center',
+              justifyContent:'center', flexShrink:0 },
+  };
+
+  const isDisabled = loading || !input.trim();
+
+  return (
+    <div style={S.wrap}>
+      {/* Header */}
+      <div style={S.hd}>
+        <div style={S.hdAv}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0l2.5 9.5L24 12l-9.5 2.5L12 24l-2.5-9.5L0 12l9.5-2.5L12 0z"/>
+          </svg>
+        </div>
+        <div style={{flex:1}}>
+          <div style={S.hdName}>AI Investigator</div>
+          <div style={S.hdSub}><span style={S.dot}/> Analysing {txn.id} · Score {txn.risk}/100</div>
+        </div>
+        {loading && <div style={{fontSize:10,color:'#00a884',fontStyle:'italic'}}>thinking…</div>}
+      </div>
+
+      {/* Messages — 260 px fixed, scrolls internally */}
+      <div style={S.msgs}>
+        {messages.map((m,i)=>(
+          <div key={i} style={m.role==='ai' ? S.rowAi : S.rowUs}>
+            <div style={m.role==='ai' ? S.bubAi : S.bubUs}>
+              <div dangerouslySetInnerHTML={{__html: md(m.text)}}/>
+              <div style={S.foot}>
+                <span style={S.ts}>{m.time}</span>
+                {m.role==='user' && <span style={S.ticks}>✓✓</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div style={S.rowAi}>
+            <div style={S.bubAi}>
+              <div style={S.dots}>
+                {[0,200,400].map(d=>(
+                  <span key={d} style={{width:7,height:7,borderRadius:'50%',background:'#8696a0',
+                    display:'inline-block',animation:'wa-pop 1.2s infinite',animationDelay:d+'ms'}}/>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={endRef}/>
+      </div>
+
+      {/* Quick chips */}
+      <div style={S.chips}>
+        {QUICK.map((q,i)=>(
+          <button key={i} style={S.chip} disabled={loading} onClick={()=>sendMsg(q.msg)}>{q.label}</button>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div style={S.inRow}>
+        <input
+          style={S.inBox}
+          placeholder="Ask about this transaction…"
+          value={input}
+          onChange={e=>setInput(e.target.value)}
+          onKeyDown={e=>{ if(e.key==='Enter') sendMsg(); }}
+          disabled={loading}
+        />
+        <button style={isDisabled ? S.btnDis : S.btn} disabled={isDisabled} onClick={()=>sendMsg()}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TxnDrawer({txn, onClose, onAction}){
   if(!txn) return null;
   const fmt = (n) => '₹'+n.toLocaleString('en-IN');
@@ -1523,6 +1938,7 @@ function TxnDrawer({txn, onClose, onAction}){
             ))}
           </div>
         </div>
+        <TxnChatbot txn={txn}/>
         <div className="drawer-actions">
           <button className="btn bad"   onClick={()=>onAction('block',txn)}>BLOCK</button>
           <button className="btn warn"  onClick={()=>onAction('review',txn)}>SEND TO REVIEW</button>
@@ -1538,7 +1954,7 @@ Object.assign(window,{
   Spark, KpiCard, RiskPill, CatPill, FlagPill,
   LiveFeed, RiskDistribution, VelocityCard,
   BankBreakdown, CategoryMix, GeoAnomaly,
-  AttackPatterns, MuleNetwork, ModelPerf, AlertFeed, TxnDrawer
+  AttackPatterns, MuleNetwork, ModelPerf, AlertFeed, TxnDrawer, TxnChatbot
 });
   </script>
 
@@ -1580,7 +1996,7 @@ const Icon = ({name}) => {
 };
 
 const NAV = [
-  {grp:'OPS', items:[
+  {grp:'DASHBOARD', items:[
     {id:'overview', label:'Overview',    icon:'overview'},
     {id:'feed',     label:'Live Feed',   icon:'feed',    badge:'LIVE', tone:'bad'},
     {id:'alerts',   label:'Alerts',      icon:'alerts',  badge:'47',   tone:'bad'},
@@ -1784,6 +2200,476 @@ function AppTweaks({t, setTweak}){
   );
 }
 
+/* ─── Settings Page ─── */
+const STG_SECTIONS = [
+  {id:'appearance',   name:'Appearance',       sub:'Theme & accent'},
+  {id:'layout',       name:'Layout & Density',  sub:'Workspace arrangement'},
+  {id:'modules',      name:'Modules',            sub:'Dashboard widgets'},
+  {id:'datastream',   name:'Data Stream',        sub:'Ingest & buffering'},
+  {id:'risk',         name:'Risk Thresholds',    sub:'Scoring & blocks'},
+  {id:'alert',        name:'Alert Routing',      sub:'Channels & escalation'},
+  {id:'integrations', name:'Integrations',       sub:'Connected services'},
+  {id:'team',         name:'Team & Roles',       sub:'Members & access'},
+  {id:'audit',        name:'Audit Log',          sub:'Change history'},
+];
+const STG_ACCENTS = ['#4cc4d7','#4da6f5','#3ecf8e','#f0b049','#8a7df0','#ec5b5b','#6366f1'];
+
+const INTEGRATIONS_DATA = [
+  {name:'NPCI Settlement', status:'CONNECTED',    sync:'12s ago'},
+  {name:'RBI CFCFRMS',     status:'CONNECTED',    sync:'2m ago'},
+  {name:'I4C Cyber Crime', status:'CONNECTED',    sync:'15m ago'},
+  {name:'Slack #fraud-ops',status:'CONNECTED',    sync:'live'},
+  {name:'PagerDuty',       status:'CONNECTED',    sync:'live'},
+  {name:'ServiceNow',      status:'DISCONNECTED', sync:'—'},
+  {name:'Splunk SIEM',     status:'CONNECTED',    sync:'38s ago'},
+];
+
+const MEMBERS_DATA = [
+  {name:'Rahul K.',  email:'rahul@risk-ops',  role:'ADMIN',   last:'now'},
+  {name:'Priya S.',  email:'priya@risk-ops',  role:'ANALYST', last:'2m ago'},
+  {name:'Amit V.',   email:'amit@risk-ops',   role:'ANALYST', last:'5m ago'},
+  {name:'Neha R.',   email:'neha@risk-ops',   role:'ANALYST', last:'12m ago'},
+  {name:'Sanjay M.', email:'sanjay@risk-ops', role:'VIEWER',  last:'1h ago'},
+  {name:'Kavya I.',  email:'kavya@risk-ops',  role:'ADMIN',   last:'3h ago'},
+];
+
+const AUDIT_DATA = [
+  {time:'14:32:11', actor:'rahul@', action:'BLOCK',            target:'UPI4FZ8K2', tone:'bad'},
+  {time:'14:30:05', actor:'priya@', action:'REVIEW',           target:'UPI8H2NQ4', tone:'warn'},
+  {time:'14:28:00', actor:'system', action:'MODEL_RETRAIN',    target:'XGBoost v4.2', tone:'accent'},
+  {time:'14:15:47', actor:'priya@', action:'CLEAR',            target:'UPI2KX7P9', tone:'ok'},
+  {time:'13:58:22', actor:'amit@',  action:'ESCALATE',         target:'UPI9MV3R6', tone:'warn'},
+  {time:'13:42:00', actor:'rahul@', action:'THRESHOLD_CHANGE', target:'BLOCK 70→68', tone:'accent'},
+  {time:'12:01:14', actor:'system', action:'INTEGRATION',      target:'I4C sync', tone:'accent'},
+];
+
+function StgSwitch({value, onChange}){
+  return (
+    <button type="button" className="stg-switch" data-on={value?'1':'0'}
+            role="switch" aria-checked={!!value} onClick={()=>onChange(!value)}>
+      <i/>
+    </button>
+  );
+}
+
+function StgAppearance({t, setTweak}){
+  return (
+    <>
+      <div className="stg-card">
+        <div className="stg-card-hd">
+          <span className="stg-card-label">THEME</span>
+          <span className="stg-card-badge">live preview</span>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Color scheme</div>
+            <div className="stg-row-desc">Switch between dark and light terminal themes.</div>
+          </div>
+          <div className="stg-toggle-group">
+            {['dark','light'].map(v=>(
+              <button key={v} className={'stg-toggle-btn'+(t.theme===v?' active':'')}
+                      onClick={()=>setTweak('theme',v)}>{v.toUpperCase()}</button>
+            ))}
+          </div>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Accent color</div>
+            <div className="stg-row-desc">Used for highlights, charts, and active states.</div>
+            <div className="stg-accent-note">currently · {t.accent}</div>
+          </div>
+          <div className="stg-swatches">
+            {STG_ACCENTS.map(c=>(
+              <div key={c} className={'stg-swatch'+(t.accent===c?' selected':'')}
+                   style={{background:c}} onClick={()=>setTweak('accent',c)} title={c}/>
+            ))}
+            <div className="stg-swatch-custom"
+                 style={{background:'linear-gradient(135deg,#4cc4d7,#8a7df0,#ec5b5b)'}}/>
+          </div>
+        </div>
+      </div>
+      <div className="stg-card">
+        <div className="stg-card-hd">
+          <span className="stg-card-label">TYPOGRAPHY</span>
+          <span className="stg-card-badge">read-only</span>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Display font</div>
+            <div className="stg-row-desc">Used for headings and body text.</div>
+          </div>
+          <span className="stg-readonly">Geist · system fallback</span>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Monospace font</div>
+            <div className="stg-row-desc">Used for transaction IDs, amounts, timestamps.</div>
+          </div>
+          <span className="stg-readonly">JetBrains Mono</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function StgLayout({t, setTweak}){
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd"><span className="stg-card-label">WORKSPACE</span></div>
+      <div className="stg-row">
+        <div className="stg-row-info">
+          <div className="stg-row-name">Layout variation</div>
+          <div className="stg-row-desc">Balanced grid, command center, or max-density trader view.</div>
+        </div>
+        <select className="stg-select" value={t.layout} onChange={e=>setTweak('layout',e.target.value)}>
+          <option value="grid">Grid (balanced)</option>
+          <option value="command">Command center</option>
+          <option value="trader">Trader view (max density)</option>
+        </select>
+      </div>
+      <div className="stg-row">
+        <div className="stg-row-info">
+          <div className="stg-row-name">Density</div>
+          <div className="stg-row-desc">Compact reduces padding for more data per screen.</div>
+        </div>
+        <div className="stg-toggle-group">
+          {['compact','comfortable'].map(v=>(
+            <button key={v} className={'stg-toggle-btn'+(t.density===v?' active':'')}
+                    onClick={()=>setTweak('density',v)}>{v.toUpperCase()}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StgModules({t, setTweak}){
+  const mods = [
+    {key:'showKpis',     label:'KPI cards',          desc:'Top-level performance metrics.'},
+    {key:'showFeed',     label:'Live feed',           desc:'Real-time transaction stream.'},
+    {key:'showRiskDist', label:'Risk distribution',   desc:'Histogram of risk score buckets.'},
+    {key:'showVelocity', label:'Velocity chart',      desc:'Fraud rate over the last 6 hours.'},
+    {key:'showBanks',    label:'Bank breakdown',      desc:'Fraud rate by bank.'},
+    {key:'showCategory', label:'Category mix',        desc:'P2P / Merchant / Utility / Retail split.'},
+    {key:'showGeo',      label:'Geographic anomaly',  desc:'City-level fraud spike detection.'},
+    {key:'showPatterns', label:'Attack patterns',     desc:'Detected fraud pattern clusters.'},
+    {key:'showMule',     label:'Mule network',        desc:'Graph of suspected mule accounts.'},
+    {key:'showModel',    label:'Model performance',   desc:'Live model metrics and status.'},
+    {key:'showAlerts',   label:'Alert stream',        desc:'High-risk alert feed.'},
+  ];
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd">
+        <span className="stg-card-label">DASHBOARD WIDGETS</span>
+        <span className="stg-card-badge">toggle to show / hide</span>
+      </div>
+      {mods.map(m=>(
+        <div key={m.key} className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">{m.label}</div>
+            <div className="stg-row-desc">{m.desc}</div>
+          </div>
+          <StgSwitch value={t[m.key]} onChange={v=>setTweak(m.key,v)}/>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StgDataStream({t, setTweak}){
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd"><span className="stg-card-label">INGEST & BUFFERING</span></div>
+      <div className="stg-row">
+        <div className="stg-row-info">
+          <div className="stg-row-name">Stream speed</div>
+          <div className="stg-row-desc">New transactions injected per second. 0 = paused.</div>
+          <div className="stg-accent-note">currently · {t.animSpeed===0?'paused':t.animSpeed+'/s'}</div>
+        </div>
+        <div className="stg-toggle-group">
+          {[0,1,2,3,4,6].map(v=>(
+            <button key={v} className={'stg-toggle-btn'+(t.animSpeed===v?' active':'')}
+                    onClick={()=>setTweak('animSpeed',v)} style={{minWidth:28}}>
+              {v===0?'⏸':v}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="stg-row">
+        <div className="stg-row-info">
+          <div className="stg-row-name">Ingest endpoint</div>
+          <div className="stg-row-desc">NPCI production Kafka pipeline.</div>
+        </div>
+        <span className="stg-readonly">npci-prod-mum · 9092</span>
+      </div>
+      <div className="stg-row">
+        <div className="stg-row-info">
+          <div className="stg-row-name">Buffer size</div>
+          <div className="stg-row-desc">Max transactions held in memory.</div>
+        </div>
+        <span className="stg-readonly">80 txns</span>
+      </div>
+    </div>
+  );
+}
+
+function StgRisk(){
+  const [reviewVal, setReviewVal] = useState(40);
+  const [blockVal,  setBlockVal]  = useState(70);
+  const [velocity,  setVelocity]  = useState(3);
+  const [pendingR,  setPendingR]  = useState(40);
+  const [pendingB,  setPendingB]  = useState(70);
+  const dirty = pendingR !== reviewVal || pendingB !== blockVal;
+  return (
+    <>
+      <div className="stg-warning-banner">
+        <span className="stg-warning-title">Caution.</span>
+        {' '}Lowering BLOCK threshold catches more fraud but increases false positives. Changes apply on save.
+      </div>
+      <div className="stg-card">
+        <div className="stg-card-hd">
+          <span className="stg-card-label">SCORING TIERS</span>
+          <span className="stg-card-badge">production v4.2</span>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">REVIEW threshold</div>
+            <div className="stg-row-desc">Score ≥ this routes to analyst queue.</div>
+            <div className="stg-accent-note">default · 40</div>
+          </div>
+          <input type="number" className="stg-num-input" value={pendingR} min={0} max={100}
+                 onChange={e=>setPendingR(Number(e.target.value))}/>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">BLOCK threshold</div>
+            <div className="stg-row-desc">Score ≥ this auto-blocks the transaction.</div>
+            <div className="stg-accent-note">default · 70</div>
+          </div>
+          <input type="number" className="stg-num-input" value={pendingB} min={0} max={100}
+                 onChange={e=>setPendingB(Number(e.target.value))}/>
+        </div>
+        {dirty && (
+          <div className="stg-card-actions">
+            <button className="stg-btn-outline" onClick={()=>{setPendingR(reviewVal);setPendingB(blockVal);}}>Cancel</button>
+            <button className="stg-btn-primary" onClick={()=>{setReviewVal(pendingR);setBlockVal(pendingB);}}>Apply</button>
+          </div>
+        )}
+      </div>
+      <div className="stg-card">
+        <div className="stg-card-hd"><span className="stg-card-label">BEHAVIORAL TRIGGERS</span></div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Velocity alarm</div>
+            <div className="stg-row-desc">Frauds/hour to trigger attack-wave banner.</div>
+          </div>
+          <input type="number" className="stg-num-input" value={velocity} min={1}
+                 onChange={e=>setVelocity(Number(e.target.value))}/>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function StgAlertRouting(){
+  const [slack,      setSlack]      = useState('#fraud-ops');
+  const [pagerduty,  setPagerduty]  = useState(true);
+  const [sms,        setSms]        = useState(true);
+  const [sound,      setSound]      = useState(false);
+  return (
+    <>
+      <div className="stg-card">
+        <div className="stg-card-hd"><span className="stg-card-label">CHANNELS</span></div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Slack webhook</div>
+            <div className="stg-row-desc">Post CRITICAL alerts to channel.</div>
+          </div>
+          <input className="stg-input" value={slack} onChange={e=>setSlack(e.target.value)}/>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">PagerDuty</div>
+            <div className="stg-row-desc">On-call escalation for attack waves.</div>
+          </div>
+          <StgSwitch value={pagerduty} onChange={setPagerduty}/>
+        </div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">SMS to RBI ombudsman</div>
+            <div className="stg-row-desc">Required for ₹5L+ blocks per RBI directive.</div>
+          </div>
+          <StgSwitch value={sms} onChange={setSms}/>
+        </div>
+      </div>
+      <div className="stg-card">
+        <div className="stg-card-hd"><span className="stg-card-label">IN-BROWSER</span></div>
+        <div className="stg-row">
+          <div className="stg-row-info">
+            <div className="stg-row-name">Sound alarm</div>
+            <div className="stg-row-desc">Audible chime on CRITICAL alerts. Click toggle or Test to preview.</div>
+          </div>
+          <StgSwitch value={sound} onChange={setSound}/>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function StgIntegrations(){
+  const active = INTEGRATIONS_DATA.filter(s=>s.status==='CONNECTED').length;
+  const disc   = INTEGRATIONS_DATA.filter(s=>s.status==='DISCONNECTED').length;
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd">
+        <span className="stg-card-label">CONNECTED SERVICES</span>
+        <span className="stg-card-badge">{active} active · {disc} disconnected</span>
+      </div>
+      <div className="stg-tbl-hd stg-tbl-integrations">
+        <span>SERVICE</span><span>STATUS</span><span>LAST SYNC</span><span></span>
+      </div>
+      {INTEGRATIONS_DATA.map(svc=>(
+        <div key={svc.name} className="stg-tbl-row stg-tbl-integrations">
+          <span className="mono">{svc.name}</span>
+          <span><span className={'stg-status '+(svc.status==='CONNECTED'?'ok':'bad')}>{svc.status}</span></span>
+          <span className="mono dim">{svc.sync}</span>
+          <span><button className="stg-btn-outline" style={{fontSize:10,height:22,padding:'0 8px'}}>Configure</button></span>
+        </div>
+      ))}
+      <div className="stg-tbl-foot">
+        <button className="stg-btn-primary">+ Add integration</button>
+      </div>
+    </div>
+  );
+}
+
+function StgTeamRoles(){
+  const admins = MEMBERS_DATA.filter(m=>m.role==='ADMIN').length;
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd">
+        <span className="stg-card-label">MEMBERS</span>
+        <span className="stg-card-badge">{MEMBERS_DATA.length} total · {admins} admins</span>
+      </div>
+      <div className="stg-tbl-hd stg-tbl-members">
+        <span>NAME</span><span>EMAIL</span><span>ROLE</span><span>LAST ACTIVE</span>
+      </div>
+      {MEMBERS_DATA.map(m=>(
+        <div key={m.email} className="stg-tbl-row stg-tbl-members">
+          <span>{m.name}</span>
+          <span className="mono dim">{m.email}</span>
+          <span><span className={'stg-role-badge role-'+m.role.toLowerCase()}>{m.role}</span></span>
+          <span className="dim">{m.last}</span>
+        </div>
+      ))}
+      <div className="stg-tbl-foot">
+        <button className="stg-btn-primary">+ Invite member</button>
+      </div>
+    </div>
+  );
+}
+
+function StgAuditLog(){
+  return (
+    <div className="stg-card">
+      <div className="stg-card-hd">
+        <span className="stg-card-label">RECENT ACTIVITY</span>
+        <span className="stg-card-badge">last 24h · {AUDIT_DATA.length} events</span>
+      </div>
+      <div className="stg-tbl-hd stg-tbl-audit">
+        <span>TIME</span><span>ACTOR</span><span>ACTION</span><span>TARGET</span>
+      </div>
+      {AUDIT_DATA.map((e,i)=>(
+        <div key={i} className="stg-tbl-row stg-tbl-audit">
+          <span className="mono dim">{e.time}</span>
+          <span className="mono">{e.actor}</span>
+          <span><span className={'stg-action-badge action-'+e.tone}>{e.action}</span></span>
+          <span className="mono accent">{e.target}</span>
+        </div>
+      ))}
+      <div className="stg-tbl-foot">
+        <button className="stg-btn-outline">Export full log →</button>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPage({t, setTweak}){
+  const [activeTab,     setActiveTab]     = useState('USER');
+  const [activeSection, setActiveSection] = useState('appearance');
+  const [saved,         setSaved]         = useState(true);
+
+  const idx = STG_SECTIONS.findIndex(s=>s.id===activeSection);
+  const cur = STG_SECTIONS[idx];
+
+  const wrappedSet = (k,v) => { setTweak(k,v); setSaved(false); };
+
+  const handleSave  = () => setSaved(true);
+  const handleReset = () => { setActiveSection('appearance'); setSaved(true); };
+
+  const renderSection = () => {
+    switch(activeSection){
+      case 'appearance':   return <StgAppearance t={t} setTweak={wrappedSet}/>;
+      case 'layout':       return <StgLayout t={t} setTweak={wrappedSet}/>;
+      case 'modules':      return <StgModules t={t} setTweak={wrappedSet}/>;
+      case 'datastream':   return <StgDataStream t={t} setTweak={wrappedSet}/>;
+      case 'risk':         return <StgRisk/>;
+      case 'alert':        return <StgAlertRouting/>;
+      case 'integrations': return <StgIntegrations/>;
+      case 'team':         return <StgTeamRoles/>;
+      case 'audit':        return <StgAuditLog/>;
+      default:             return null;
+    }
+  };
+
+  return (
+    <div className="stg-root">
+      {/* page header */}
+      <div className="stg-hd">
+        <div className="stg-hd-left">
+          <span className="stg-hd-title">Settings</span>
+          <span className="stg-sep">/</span>
+          <span className="stg-hd-crumb">system</span>
+          <span className="stg-sep">/</span>
+          <span className="stg-hd-crumb">settings</span>
+        </div>
+        <div className="stg-hd-actions">
+          {!saved && <span className="stg-unsaved">unsaved</span>}
+          <button className="stg-btn-reset" onClick={handleReset}>Reset</button>
+          <button className="stg-btn-save" onClick={handleSave}>Save changes</button>
+        </div>
+      </div>
+      {/* tabs */}
+      <div className="stg-tabs">
+        {['USER','ENV','INTEGRATIONS','LAST CHANGE'].map(tab=>(
+          <div key={tab} className={'stg-tab'+(activeTab===tab?' active':'')}
+               onClick={()=>setActiveTab(tab)}>{tab}</div>
+        ))}
+      </div>
+      {/* body */}
+      <div className="stg-body">
+        <nav className="stg-nav">
+          <div className="stg-nav-label">SECTIONS</div>
+          {STG_SECTIONS.map(s=>(
+            <div key={s.id} className={'stg-nav-item'+(activeSection===s.id?' active':'')}
+                 onClick={()=>setActiveSection(s.id)}>
+              <div className="stg-nav-name">{s.name}</div>
+              <div className="stg-nav-sub">{s.sub}</div>
+            </div>
+          ))}
+          <div className="stg-nav-foot">{STG_SECTIONS.length} sections · 32 fields</div>
+        </nav>
+        <div className="stg-main">
+          <div className="stg-section-badge">SECTION · {idx+1} OF {STG_SECTIONS.length}</div>
+          <div className="stg-section-title">{cur.name}</div>
+          <div className="stg-section-sub">{cur.sub}</div>
+          {renderSection()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App(){
   const [t, setTweak]     = useTweaks(TWEAK_DEFAULTS);
   const [active, setActive] = useState('overview');
@@ -1844,7 +2730,7 @@ function App(){
       case 'alerts':   return (<><div className="page-hd"><h1>Alert Stream</h1><span className="crumbs">/ ops / alerts</span></div><AlertFeed alerts={alerts}/><div className="row r2"><AttackPatterns/><VelocityCard/></div></>);
       case 'patterns': return (<><div className="page-hd"><h1>Attack Patterns</h1><span className="crumbs">/ intel / patterns</span></div><AttackPatterns/><div className="row r2"><MuleNetwork/><GeoAnomaly/></div></>);
       case 'analyst':  return (<><div className="page-hd"><h1>Analyst Performance</h1><span className="crumbs">/ system / analysts</span></div><AlertFeed alerts={alerts}/></>);
-      default:         return (<><div className="page-hd"><h1>Settings</h1><span className="crumbs">/ system / settings</span></div><div className="card"><span className="dim">Use the Tweaks panel (bottom-right).</span></div></>);
+      default:         return <SettingsPage t={t} setTweak={setTweak}/>;
     }
   })();
 
@@ -1861,5 +2747,541 @@ function App(){
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
   </script>
+
+<!-- ════════════════════════════════════════════════════════
+     WhatsApp-style AI Investigator (TxnDrawer inline chat)
+     ════════════════════════════════════════════════════════ -->
+<style>
+/* ── WA wrapper ─────────────────────────────────────────── */
+.wa-wrap{
+  display:flex;flex-direction:column;
+  border-radius:8px;overflow:hidden;
+  background:#0b141a;
+  background-image:url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.018'%3E%3Cpath d='M0 0h4v4H0zm8 0h4v4H8zm8 0h4v4h-4zm8 0h4v4h-4zm8 0h4v4h-4zm8 0h4v4h-4zM4 4h4v4H4zm8 0h4v4h-4zm8 0h4v4h-4zm8 0h4v4h-4zm8 0h4v4h-4z'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* ── Header ─────────────────────────────────────────────── */
+.wa-hd{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;background:#202c33;
+  border-radius:8px 8px 0 0;
+  flex-shrink:0;
+}
+.wa-hd-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#00a884,#128c7e);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.wa-hd-name{font-size:13px;font-weight:600;color:#e9edef;font-family:'Geist',sans-serif;}
+.wa-hd-sub{display:flex;align-items:center;gap:5px;font-size:10px;color:#8696a0;margin-top:1px;}
+.wa-dot-green{width:6px;height:6px;border-radius:50%;background:#00a884;display:inline-block;box-shadow:0 0 4px #00a884;}
+.wa-analyzing{margin-left:auto;font-size:10px;color:#00a884;font-style:italic;}
+
+/* ── Messages area ───────────────────────────────────────── */
+.wa-msgs{
+  height:260px;
+  overflow-y:auto;
+  padding:10px 12px;
+  display:flex;flex-direction:column;gap:6px;
+  scroll-behavior:smooth;
+}
+.wa-msgs::-webkit-scrollbar{width:4px;}
+.wa-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+
+.wa-row{display:flex;margin-bottom:2px;}
+.wa-row-ai{justify-content:flex-start;}
+.wa-row-user{justify-content:flex-end;}
+
+/* ── Bubbles ─────────────────────────────────────────────── */
+.wa-bub{
+  max-width:85%;padding:7px 10px 3px;border-radius:8px;
+  font-size:12px;line-height:1.55;position:relative;word-break:break-word;
+  font-family:'Geist',sans-serif;
+}
+.wa-bub-ai{
+  background:#202c33;color:#e9edef;
+  border-top-left-radius:2px;
+}
+.wa-bub-ai::before{
+  content:'';position:absolute;top:0;left:-6px;
+  border:6px solid transparent;border-top-color:#202c33;border-left:0;
+}
+.wa-bub-user{
+  background:#005c4b;color:#e9edef;
+  border-top-right-radius:2px;
+}
+.wa-bub-user::after{
+  content:'';position:absolute;top:0;right:-6px;
+  border:6px solid transparent;border-top-color:#005c4b;border-right:0;
+}
+.wa-bub-text strong{font-weight:600;color:#fff;}
+.wa-bub-text em{color:#8696a0;font-style:italic;}
+.wa-code{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px;font-size:10px;font-family:'JetBrains Mono',monospace;}
+.wa-ul{padding-left:14px;margin:4px 0;}
+.wa-ul li{margin:2px 0;}
+.wa-bub-foot{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px;}
+.wa-ts{font-size:10px;color:#8696a0;}
+.wa-ticks{font-size:11px;color:#53bdeb;letter-spacing:-1px;}
+
+/* ── Typing dots ─────────────────────────────────────────── */
+.wa-dots{display:flex;gap:4px;padding:3px 2px;}
+.wa-dots span{width:7px;height:7px;border-radius:50%;background:#8696a0;animation:wa-pop 1.2s infinite;}
+.wa-dots span:nth-child(2){animation-delay:.2s;}
+.wa-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes wa-pop{0%,80%,100%{transform:scale(.75);opacity:.5}40%{transform:scale(1.1);opacity:1}}
+
+/* ── Quick chips ─────────────────────────────────────────── */
+.wa-chips{
+  display:flex;flex-wrap:wrap;gap:5px;
+  padding:7px 12px;
+  border-top:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;
+}
+.wa-chip{
+  background:#1a2530;border:1px solid rgba(0,168,132,.28);
+  color:#00a884;border-radius:16px;padding:4px 11px;
+  font-size:10px;cursor:pointer;white-space:nowrap;
+  font-family:'Geist',sans-serif;transition:all .15s;
+}
+.wa-chip:hover:not(:disabled){background:rgba(0,168,132,.15);}
+.wa-chip:disabled{opacity:.38;cursor:not-allowed;}
+
+/* ── Input row ───────────────────────────────────────────── */
+.wa-in-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;background:#202c33;
+  border-radius:0 0 8px 8px;flex-shrink:0;
+}
+.wa-in{
+  flex:1;background:#2a3942;border:none;border-radius:20px;
+  padding:8px 14px;font-size:12px;color:#e9edef;
+  font-family:'Geist',sans-serif;outline:none;
+}
+.wa-in::placeholder{color:#8696a0;}
+.wa-in:disabled{opacity:.6;}
+.wa-send{
+  width:36px;height:36px;border-radius:50%;
+  background:#00a884;border:none;color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .15s,transform .1s;
+}
+.wa-send:hover:not(:disabled){background:#02c197;transform:scale(1.05);}
+.wa-send:disabled{background:#3c4d52;cursor:not-allowed;transform:none;}
+</style>
+
+<!-- ════════════════════════════════════════════════════════
+     UPI Risk Copilot — AI Chatbot Widget
+     Capabilities: Risk explanation · NL-to-SQL · Auto insights · RAG
+     Backend: uvicorn chatbot_backend:app --reload --port 8000
+     ════════════════════════════════════════════════════════ -->
+<style>
+/* ── Floating Button ─────────────────────────────────────── */
+.chat-fab{
+  position:fixed;bottom:28px;right:28px;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#4cc4d7 0%,#8a7df0 100%);
+  border:none;cursor:pointer;font-size:22px;
+  box-shadow:0 4px 24px rgba(76,196,215,.45);
+  z-index:10000;transition:transform .2s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;
+}
+.chat-fab:hover{transform:scale(1.09);box-shadow:0 6px 32px rgba(76,196,215,.6);}
+
+/* ── Panel ───────────────────────────────────────────────── */
+.chat-panel{
+  position:fixed;bottom:96px;right:28px;
+  width:430px;height:630px;
+  background:#11141a;
+  border:1px solid rgba(76,196,215,.22);
+  border-radius:16px;
+  box-shadow:0 24px 64px rgba(0,0,0,.7);
+  z-index:9999;display:flex;flex-direction:column;overflow:hidden;
+  animation:cp-up .22s ease;
+}
+@keyframes cp-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ── Header ─────────────────────────────────────────────── */
+.chat-hd{
+  padding:13px 15px;background:#161a21;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;flex-shrink:0;
+}
+.chat-hd-left{display:flex;align-items:center;gap:10px;}
+.chat-hd-avatar{font-size:21px;}
+.chat-hd-title{font-size:13px;font-weight:600;color:#e7eaf0;font-family:'Geist',sans-serif;}
+.chat-hd-sub{font-size:10px;color:#7c8492;margin-top:1px;}
+.txn-id-input{
+  background:#1d222b;border:1px solid rgba(255,255,255,.12);
+  color:#e7eaf0;border-radius:6px;padding:4px 9px;
+  font-size:10px;width:96px;outline:none;
+  font-family:'JetBrains Mono',monospace;
+  transition:border-color .15s;
+}
+.txn-id-input:focus{border-color:rgba(76,196,215,.5);}
+.txn-id-input::placeholder{color:#4a525e;}
+
+/* ── Messages ───────────────────────────────────────────── */
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:12px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.chat-msgs::-webkit-scrollbar{width:4px;}
+.chat-msgs::-webkit-scrollbar-track{background:transparent;}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+
+.c-msg{display:flex;gap:8px;align-items:flex-start;}
+.c-msg-user{flex-direction:row-reverse;}
+.c-av{font-size:15px;flex-shrink:0;margin-top:3px;}
+.c-bub{max-width:87%;border-radius:12px;padding:10px 13px;font-size:12px;line-height:1.55;font-family:'Geist',sans-serif;}
+.c-bub-bot{background:#1d222b;color:#e7eaf0;border-bottom-left-radius:4px;}
+.c-bub-user{
+  background:linear-gradient(135deg,#4cc4d7 0%,#8a7df0 100%);
+  color:#fff;border-bottom-right-radius:4px;
+}
+.c-bub-bot strong{font-weight:600;color:#e7eaf0;}
+.c-bub-bot code{
+  background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:#4cc4d7;
+}
+.c-bub-bot h3{font-size:12px;font-weight:600;margin:6px 0 3px;color:#e7eaf0;}
+.c-bub-bot ul{padding-left:16px;margin:4px 0;}
+.c-bub-bot li{margin:2px 0;}
+
+/* ── SQL block ───────────────────────────────────────────── */
+.sql-blk{
+  margin-top:9px;background:rgba(0,0,0,.35);
+  border-radius:8px;padding:8px 11px;border-left:3px solid #4cc4d7;
+}
+.sql-lbl{font-size:9px;color:#4cc4d7;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.sql-code{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:#b6bdc9;white-space:pre-wrap;word-break:break-all;display:block;
+}
+
+/* ── Results table ───────────────────────────────────────── */
+.res-blk{margin-top:9px;}
+.res-lbl{font-size:9px;color:#f0b049;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.res-scroll{overflow-x:auto;border-radius:6px;max-height:140px;overflow-y:auto;}
+.res-tbl{width:100%;border-collapse:collapse;font-size:10px;
+  font-family:'JetBrains Mono',monospace;}
+.res-tbl th{
+  background:rgba(76,196,215,.15);color:#4cc4d7;
+  padding:4px 8px;text-align:left;font-weight:600;
+  white-space:nowrap;position:sticky;top:0;
+}
+.res-tbl td{
+  padding:3px 8px;border-top:1px solid rgba(255,255,255,.05);
+  color:#b6bdc9;white-space:nowrap;
+}
+.res-tbl tr:hover td{background:rgba(255,255,255,.03);}
+
+/* ── Intent badge ────────────────────────────────────────── */
+.i-badge{
+  display:inline-block;margin-top:8px;padding:2px 8px;
+  border-radius:4px;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.i-explain_risk{background:rgba(236,91,91,.2);color:#ec5b5b;}
+.i-nl_to_sql   {background:rgba(76,196,215,.2);color:#4cc4d7;}
+.i-insights    {background:rgba(240,176,73,.2);color:#f0b049;}
+.i-general     {background:rgba(138,125,240,.2);color:#8a7df0;}
+
+/* ── Typing indicator ────────────────────────────────────── */
+.typing{display:flex;gap:4px;padding:4px 2px;}
+.typing span{
+  width:6px;height:6px;border-radius:50%;background:#7c8492;
+  animation:ty-bounce 1.2s infinite;
+}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes ty-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* ── Suggestions ─────────────────────────────────────────── */
+.chat-sugg{
+  padding:8px 12px;display:flex;flex-wrap:wrap;gap:5px;
+  border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;
+}
+.sugg-chip{
+  background:#1d222b;border:1px solid rgba(76,196,215,.22);
+  color:#b6bdc9;border-radius:20px;padding:4px 10px;
+  font-size:10px;cursor:pointer;transition:all .15s;
+  white-space:nowrap;font-family:'Geist',sans-serif;
+}
+.sugg-chip:hover:not(:disabled){
+  background:rgba(76,196,215,.14);color:#4cc4d7;border-color:#4cc4d7;
+}
+.sugg-chip:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ── Input row ───────────────────────────────────────────── */
+.chat-in-row{
+  padding:10px 12px;display:flex;gap:8px;align-items:flex-end;
+  border-top:1px solid rgba(255,255,255,.07);
+  background:#161a21;flex-shrink:0;
+}
+.chat-in{
+  flex:1;background:#1d222b;
+  border:1px solid rgba(255,255,255,.1);color:#e7eaf0;
+  border-radius:10px;padding:8px 12px;font-size:12px;
+  font-family:'Geist',sans-serif;resize:none;outline:none;
+  transition:border-color .15s;max-height:100px;
+}
+.chat-in:focus{border-color:rgba(76,196,215,.5);}
+.chat-in::placeholder{color:#4a525e;}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#4cc4d7 0%,#8a7df0 100%);
+  border:none;color:#fff;cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:opacity .15s,transform .15s;
+}
+.send-btn:disabled{opacity:.38;cursor:not-allowed;}
+.send-btn:not(:disabled):hover{transform:scale(1.1);}
+
+/* ── Connection badge ────────────────────────────────────── */
+.conn-dot{
+  width:7px;height:7px;border-radius:50%;
+  display:inline-block;margin-right:5px;vertical-align:middle;
+}
+.conn-ok{background:#6ec96a;box-shadow:0 0 6px #6ec96a;}
+.conn-err{background:#ec5b5b;box-shadow:0 0 6px #ec5b5b;}
+.conn-chk{background:#f0b049;animation:conn-pulse 1s infinite;}
+@keyframes conn-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+
+<div id="chatbot-root"></div>
+
+<script type="text/babel">
+/* ── UPI Risk Copilot Widget ─────────────────────────────── */
+(function(){
+const { useState, useRef, useEffect, useCallback } = React;
+const API = 'http://localhost:8000';
+
+const SUGGESTIONS = [
+  { label: '🔍 Why was this flagged?',     msg: 'Why was this transaction flagged? Explain the risk score and triggered rules in detail.' },
+  { label: '🏙️ Fraud from Delhi today',   msg: 'Show me all fraud transactions from Delhi today' },
+  { label: '📈 Fraud trend this week',     msg: "What's my fraud trend this week? Generate insights and patterns." },
+  { label: '🏦 Top mule accounts',         msg: 'Which cities have the highest average risk scores? Give me a breakdown.' },
+];
+
+// Simple markdown renderer (bold, italic, code, headers, bullets, line breaks)
+function renderMd(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^# (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^[-•] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, (m) => `<ul>${m}</ul>`)
+    .replace(/\n/g,'<br/>');
+}
+
+function SqlBlock({ sql }) {
+  return (
+    <div className="sql-blk">
+      <div className="sql-lbl">Generated SQL</div>
+      <code className="sql-code">{sql}</code>
+    </div>
+  );
+}
+
+function ResultsTable({ rows, total }) {
+  if (!rows || rows.length === 0) return null;
+  const keys = Object.keys(rows[0]).slice(0, 6);
+  const displayRows = rows.slice(0, 10);
+  return (
+    <div className="res-blk">
+      <div className="res-lbl">
+        {total} result{total !== 1 ? 's' : ''}{rows.length < total ? ` (showing ${rows.length})` : ''}
+      </div>
+      <div className="res-scroll">
+        <table className="res-tbl">
+          <thead>
+            <tr>{keys.map(k => <th key={k}>{k}</th>)}</tr>
+          </thead>
+          <tbody>
+            {displayRows.map((row, ri) => (
+              <tr key={ri}>
+                {keys.map((k, ki) => {
+                  const v = row[k];
+                  const disp = typeof v === 'number'
+                    ? (Number.isInteger(v) ? v.toLocaleString('en-IN') : v.toFixed(2))
+                    : String(v ?? '—');
+                  return <td key={ki}>{disp}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function Message({ m }) {
+  const isBot = m.role === 'bot';
+  return (
+    <div className={`c-msg ${isBot ? 'c-msg-bot' : 'c-msg-user'}`}>
+      {isBot && <span className="c-av">🤖</span>}
+      <div className={`c-bub ${isBot ? 'c-bub-bot' : 'c-bub-user'}`}>
+        <div dangerouslySetInnerHTML={{ __html: renderMd(m.text) }} />
+        {m.sql     && <SqlBlock sql={m.sql} />}
+        {m.rows    && <ResultsTable rows={m.rows} total={m.totalCount} />}
+        {isBot && m.intentType && m.intentType !== 'general' && (
+          <span className={`i-badge i-${m.intentType}`}>
+            {m.intentType === 'explain_risk' ? '🔍 Risk Explanation'
+              : m.intentType === 'nl_to_sql' ? '🗄️ SQL Query'
+              : m.intentType === 'insights'   ? '📊 Insights'
+              : m.intentType}
+          </span>
+        )}
+      </div>
+      {!isBot && <span className="c-av">👤</span>}
+    </div>
+  );
+}
+
+function ChatbotWidget() {
+  const [open, setOpen]       = useState(false);
+  const [conn, setConn]       = useState('checking'); // 'ok' | 'err' | 'checking'
+  const [txnId, setTxnId]     = useState('');
+  const [input, setInput]     = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msgs, setMsgs]       = useState([{
+    role: 'bot',
+    text: "Hello! I'm your **UPI Risk Copilot**, powered by Claude AI.\n\nAsk me to:\n- **Explain** why a transaction was flagged\n- **Query** transactions with natural language\n- **Generate** fraud trend insights\n- **Lookup** RBI regulations & fraud policies",
+    intentType: null,
+  }]);
+  const endRef = useRef(null);
+
+  // Health-check connection
+  useEffect(() => {
+    fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) })
+      .then(r => r.ok ? setConn('ok') : setConn('err'))
+      .catch(() => setConn('err'));
+  }, [open]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [msgs, loading]);
+
+  const send = useCallback(async (text) => {
+    const msg = (text || input).trim();
+    if (!msg || loading) return;
+    setInput('');
+    setMsgs(prev => [...prev, { role: 'user', text: msg }]);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, transaction_id: txnId || null }),
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setMsgs(prev => [...prev, {
+        role: 'bot',
+        text: data.answer || '(No response)',
+        intentType: data.type,
+        sql: data.sql || null,
+        rows: data.rows || null,
+        totalCount: data.total_count || 0,
+      }]);
+    } catch (e) {
+      setMsgs(prev => [...prev, {
+        role: 'bot',
+        text: `⚠️ **Backend unreachable.**\n\nStart the server:\n\`\`\`\nuvicorn chatbot_backend:app --reload --port 8000\n\`\`\`\n\nMake sure \`ANTHROPIC_API_KEY\` is set in your environment.`,
+        intentType: 'error',
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, input, txnId]);
+
+  const onKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  return (
+    <>
+      <button className="chat-fab" onClick={() => setOpen(o => !o)} title="UPI Risk Copilot">
+        {open ? '✕' : '🤖'}
+      </button>
+
+      {open && (
+        <div className="chat-panel">
+          {/* Header */}
+          <div className="chat-hd">
+            <div className="chat-hd-left">
+              <span className="chat-hd-avatar">🤖</span>
+              <div>
+                <div className="chat-hd-title">UPI Risk Copilot</div>
+                <div className="chat-hd-sub">
+                  <span className={`conn-dot ${conn === 'ok' ? 'conn-ok' : conn === 'err' ? 'conn-err' : 'conn-chk'}`}/>
+                  {conn === 'ok' ? 'Llama 3.1 · Live' : conn === 'err' ? 'Backend offline' : 'Connecting…'}
+                  &nbsp;·&nbsp;RAG + NL-to-SQL
+                </div>
+              </div>
+            </div>
+            <input
+              className="txn-id-input"
+              placeholder="TXN ID…"
+              value={txnId}
+              onChange={e => setTxnId(e.target.value)}
+              title="Optional: enter a Transaction ID for risk explanation context"
+            />
+          </div>
+
+          {/* Messages */}
+          <div className="chat-msgs">
+            {msgs.map((m, i) => <Message key={i} m={m} />)}
+            {loading && (
+              <div className="c-msg c-msg-bot">
+                <span className="c-av">🤖</span>
+                <div className="c-bub c-bub-bot">
+                  <div className="typing"><span/><span/><span/></div>
+                </div>
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
+
+          {/* Suggested prompts */}
+          <div className="chat-sugg">
+            {SUGGESTIONS.map((s, i) => (
+              <button key={i} className="sugg-chip" disabled={loading} onClick={() => send(s.msg)}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="chat-in-row">
+            <textarea
+              className="chat-in"
+              rows={1}
+              placeholder="Ask about fraud, risk scores, trends…"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={onKey}
+            />
+            <button className="send-btn" disabled={loading || !input.trim()} onClick={() => send()}>↑</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('chatbot-root')).render(<ChatbotWidget/>);
+})();
+</script>
 </body>
 </html>
